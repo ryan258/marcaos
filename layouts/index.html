@@ -1,0 +1,68 @@
+{{ define "main" }}
+{{ $img := resources.Get "/marcos.jpg" }}
+
+<section class="hero" style="--hero: url('{{ $img.RelPermalink }}')">
+  <div class="hero-inner">
+    <h1>Marchaos</h1>
+    <p class="tagline">{{ .Site.Params.tagline }}</p>
+    <p class="genre">{{ .Site.Params.genre }}</p>
+  </div>
+  <p class="scrollcue">the crowd doesn't dance. they receive.</p>
+</section>
+
+<section class="origin">
+  <h2>the vessel</h2>
+  <p>they called him gypsy his whole life. a fortune teller in buenos aires told him
+     he would become the international dj of the gypsy frequency. not long after,
+     fate aligned. a name emerged. a set was played. a soul split.</p>
+  <p class="whisper">marcos remained behind. marchaos walked forward.</p>
+</section>
+
+<section class="sound">
+  <h2>the sound</h2>
+  <ul class="quotes">
+    <li>"like the moment before a storm became a nightclub."</li>
+    <li>"if borges dj'd in berlin with ghost samples and a broken heart."</li>
+    <li>"basslines deep enough to bury secrets in."</li>
+  </ul>
+  <p class="spec">deep sub-bass · 124&ndash;128 bpm · filtered bandoneon · wind textures ·
+     match strikes · reversed spanish · tape hiss · minor-key refrains</p>
+</section>
+
+<section class="prophecy">
+  <h2>prophecy timeline</h2>
+  <ol class="timeline">
+    <li><span>before</span> tía warned he "walked with tempo."</li>
+    <li><span>before</span> abuelita: "cuando bailás, escuchás cosas que no están allí."</li>
+    <li><span>the fog</span> disappeared for 3 days in parque centenario. returned changed.</li>
+    <li><span>the reading</span> the fortune teller names the gypsy frequency.</li>
+    <li><span>the split</span> a set was played. marchaos walked forward.</li>
+    <li><span>2K25</span> first album <em>Gypsy Nights</em>. world tour <em>The Drop Was Foretold</em>.</li>
+  </ol>
+</section>
+
+<section class="tour">
+  <h2>ceremonies</h2>
+  <ul class="dates">
+    {{ range .Site.Params.tour }}
+    <li>
+      <span class="d">{{ .date }}</span>
+      <span class="c">{{ .city }}</span>
+      <span class="v">{{ .venue }}</span>
+    </li>
+    {{ end }}
+  </ul>
+</section>
+
+<section class="epk" id="epk">
+  <h2>press · booking</h2>
+  <p>epk: bio, visuals, prophecy timeline. set opens with darkness, a match strike, then kick.</p>
+  <p><a href="mailto:{{ .Site.Params.email }}">{{ .Site.Params.email }}</a></p>
+  <ul class="social">
+    {{ range .Site.Params.social }}
+    <li><a href="{{ .url }}" rel="noopener">{{ .name }}</a></li>
+    {{ end }}
+  </ul>
+  <p class="whisper">thank you for trusting the drop.</p>
+</section>
+{{ end }}

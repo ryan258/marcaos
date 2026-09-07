@@ -1,0 +1,9 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} · {{ .Site.Title }}{{ end }}</title>
+  <meta name="description" content="Marchaos — dark progressive house. The drop was foretold.">
+  {{ $opts := dict "transpiler" "libsass" "targetPath" "css/main.css" "outputStyle" "compressed" }}
+  {{ $css := resources.Get "scss/main.scss" | toCSS $opts | fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+</head>
