@@ -17,6 +17,66 @@ $rule:    #b87333;   // hairlines, rules                  (copper)
 $serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
 $mono:  "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
 
+// ── 126 bpm rhythm engine (ancestral house tempo) ────────────────
+$tempo-beat:   0.476s;  // 60s / 126
+$tempo-bar:    1.905s;  // 4 beats
+$tempo-phrase: 7.619s;  // 16 beats
+
+@keyframes bass-pulse {
+  0%, 100% {
+    text-shadow: 0 0 35px rgba($accent2, 0.3), 0 0 65px rgba($accent, 0.12);
+  }
+  50% {
+    text-shadow: 0 0 60px rgba($accent2, 0.55), 0 0 100px rgba($accent, 0.28);
+  }
+}
+
+@keyframes void-grain {
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(-0.8%, 0.8%); }
+  50%      { transform: translate(0.8%, -0.8%); }
+  75%      { transform: translate(-0.8%, -0.8%); }
+}
+
+@keyframes match-flare {
+  0% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+  15% {
+    opacity: 0.92;
+    filter: brightness(2.2) contrast(1.3);
+    background: radial-gradient(circle at 50% 50%, rgba($accent, 0.65) 0%, rgba($rule, 0.4) 35%, transparent 75%);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+
+@keyframes ember-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba($accent, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba($accent, 1), 0 0 22px rgba($rule, 0.6);
+    transform: scale(1.22);
+  }
+}
+
+// ── 3D ceremony sigil — a portal-halo laid back in perspective ────
+@property --sigil-spin { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+@keyframes sigil-drift {
+  from { transform: translate(-50%, -50%) rotateX(64deg) rotateZ(0deg); }
+  to   { transform: translate(-50%, -50%) rotateX(64deg) rotateZ(360deg); }
+}
+@keyframes sigil-drift-rev {
+  from { transform: rotateZ(0deg); }
+  to   { transform: rotateZ(-360deg); }
+}
+
 @mixin section {
   max-width: 46rem;
   margin: 0 auto;
@@ -62,6 +122,41 @@ a {
 .whisper { color: $muted; font-style: italic; }
 .block li > p { display: inline; margin: 0; }   // unwrap markdownify inside list items
 
+// ── atmosphere layers ─────────────────────────────────────────────
+.void-overlay {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  animation: void-grain 0.6s steps(2) infinite;
+}
+
+.blackout-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 98;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba($bg, 0.85) 100%);
+}
+
+.match-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  mix-blend-mode: screen;
+
+  &.ignited {
+    animation: match-flare 1.25s cubic-bezier(0.16, 0.84, 0.44, 1) forwards;
+  }
+}
+
 // ── hero ─────────────────────────────────────────────────────────
 .hero {
   position: relative;
@@ -77,13 +172,67 @@ a {
     var(--hero, none) center / cover no-repeat;
   filter: saturate(0.6) sepia(0.35);
 
-  &-inner { max-width: 40rem; }
+  // pointer-parallax stage — --px/--py set by ceremony.js, default flat
+  --px: 0;
+  --py: 0;
+  perspective: 900px;
+  perspective-origin: 50% 40%;
+  transform-style: preserve-3d;
+  overflow: hidden;
+
+  &-inner {
+    max-width: 40rem;
+    position: relative;
+    z-index: 1;
+    transform-style: preserve-3d;
+  }
+
+  // slow-turning halo laid ~64° back into the floor behind the title
+  .hero-sigil {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    width: #{"min(66vmin, 34rem)"};   // interpolated — libsass would try to eval min()
+    aspect-ratio: 1;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+    opacity: 0.55;
+    transform: translate(-50%, -50%) rotateX(64deg);
+    transform-style: preserve-3d;
+    will-change: transform;
+    background: conic-gradient(from 0deg,
+      transparent 0deg,
+      rgba($accent, 0.95) 38deg,
+      transparent 92deg,
+      rgba($accent2, 0.75) 200deg,
+      transparent 262deg,
+      rgba($rule, 0.85) 320deg,
+      transparent 360deg);
+    -webkit-mask: radial-gradient(circle, transparent 0 46%, #000 47% 50%, transparent 52%);
+            mask: radial-gradient(circle, transparent 0 46%, #000 47% 50%, transparent 52%);
+    filter: blur(1px) drop-shadow(0 0 26px rgba($accent, 0.45));
+    animation: sigil-drift ($tempo-phrase * 5) linear infinite;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 15%;
+      border-radius: 50%;
+      background: conic-gradient(from 180deg,
+        transparent, rgba($accent2, 0.85) 60deg,
+        transparent 150deg, rgba($accent, 0.6) 240deg, transparent 330deg);
+      -webkit-mask: radial-gradient(circle, transparent 0 43%, #000 44% 50%, transparent 53%);
+              mask: radial-gradient(circle, transparent 0 43%, #000 44% 50%, transparent 53%);
+      animation: sigil-drift-rev ($tempo-phrase * 3) linear infinite;
+    }
+  }
 
   h1 {
     font-size: clamp(3rem, 12vw, 7rem);
     margin: 0;
     letter-spacing: 0.06em;
-    text-shadow: 0 0 40px rgba($accent2, 0.35);
+    animation: bass-pulse $tempo-bar infinite ease-in-out;
   }
 
   .tagline {
@@ -97,6 +246,38 @@ a {
 
   .genre { color: $muted; font-size: 0.95rem; margin-top: 0.75rem; }
 
+  .ceremony-trigger {
+    margin-top: 2rem;
+    background: transparent;
+    border: 1px solid rgba($rule, 0.4);
+    color: $text;
+    font-family: $mono;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    padding: 0.65rem 1.4rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.3s ease;
+    border-radius: 1px;
+
+    .match-icon {
+      color: $accent;
+      font-size: 0.95rem;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      border-color: $accent;
+      color: lighten($text, 10%);
+      box-shadow: 0 0 16px rgba($accent, 0.35), 0 0 30px rgba($accent2, 0.2);
+      transform: translateZ(28px) rotateX(-7deg);
+      .match-icon { transform: scale(1.3) rotate(15deg); }
+    }
+  }
+
   .scrollcue {
     position: absolute;
     bottom: 2rem;
@@ -109,8 +290,31 @@ a {
 }
 
 // ── sections ─────────────────────────────────────────────────────
-.block { @include section; }
+.block {
+  @include section;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
 .block p:first-of-type { margin-top: 0; }
+
+// ── alchemical glyph prefixes ─────────────────────────────────────
+.about h2::before { content: "🜃 "; color: $accent; }
+.quotes-block h2::before { content: "🜄 "; color: $accent2; }
+.listen-block h2::before { content: "☿ "; color: $rule; }
+.timeline-block h2::before { content: "🜏 "; color: $accent; }
+.shows-block h2::before { content: "🜂 "; color: $rule; }
+.press-block h2::before { content: "☉ "; color: $accent; }
+
+body.ceremony-active {
+  .hero h1 {
+    animation-duration: $tempo-beat;
+    text-shadow: 0 0 50px rgba($accent, 0.6), 0 0 100px rgba($accent2, 0.4);
+  }
+  .ceremony-trigger {
+    border-color: $accent;
+    background: rgba($accent, 0.12);
+    box-shadow: 0 0 24px rgba($accent, 0.5);
+  }
+}
 
 .quotes {
   list-style: none;
@@ -123,6 +327,11 @@ a {
     padding: 0.6rem 0 0.6rem 1.2rem;
     border-left: 2px solid rgba($accent2, 0.5);
     margin-bottom: 0.5rem;
+    transition: border-left-color 0.3s ease;
+
+    &:hover {
+      border-left-color: $accent;
+    }
   }
 }
 
@@ -144,6 +353,14 @@ a {
   font-family: $mono;
   font-size: 0.8rem;
   letter-spacing: 0.1em;
+
+  li a {
+    transition: all 0.25s ease;
+    &:hover {
+      letter-spacing: 0.15em;
+      border-bottom-color: $accent;
+    }
+  }
 }
 
 // ── timeline ─────────────────────────────────────────────────────
@@ -167,6 +384,7 @@ a {
       background: $accent;
       border-radius: 50%;
       box-shadow: 0 0 12px rgba($accent, 0.8);
+      animation: ember-glow $tempo-bar infinite ease-in-out;
     }
 
     span {
@@ -186,6 +404,8 @@ a {
   list-style: none;
   padding: 0;
   margin: 0;
+  perspective: 800px;
+  transform-style: preserve-3d;
 
   li {
     display: grid;
@@ -193,6 +413,20 @@ a {
     gap: 0.25rem 1.5rem;
     padding: 1.1rem 0;
     border-top: 1px solid rgba($rule, 0.15);
+    border-left: 2px solid transparent;
+    transform-origin: left center;
+    transition: background 0.3s ease, border-left-color 0.3s ease,
+      padding 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.35s ease;
+
+    &:hover {
+      background: linear-gradient(90deg, rgba($accent, 0.08) 0%, rgba($accent2, 0.04) 45%, transparent 100%);
+      border-left-color: $accent;
+      padding-left: 0.75rem;
+      transform: translateZ(26px) rotateX(3deg) rotateY(-2deg);
+      box-shadow: -18px 22px 40px rgba($bg, 0.6), 0 0 24px rgba($accent, 0.12);
+    }
+
     &:last-child { border-bottom: 1px solid rgba($rule, 0.15); }
   }
 
@@ -217,6 +451,70 @@ footer {
   color: $muted;
   font-size: 0.9rem;
   p { margin: 0.4rem 0; }
+}
+
+// ── pointer parallax — hero title floats toward a fine pointer ────
+@media (prefers-reduced-motion: no-preference) and (pointer: fine) {
+  .hero-inner {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform:
+      translateZ(40px)
+      rotateX(calc(var(--py) * -6deg))
+      rotateY(calc(var(--px) * 6deg));
+  }
+  .hero-sigil {
+    transform:
+      translate(calc(-50% + var(--px) * 1.4rem), calc(-50% + var(--py) * 1rem))
+      rotateX(64deg);
+  }
+}
+
+// ── scroll-driven view timelines — sections stand up out of the floor
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @keyframes block-reveal {
+      from {
+        opacity: 0;
+        transform: perspective(1200px) rotateX(9deg) translateY(3rem) translateZ(-90px);
+        filter: blur(4px);
+      }
+      to {
+        opacity: 1;
+        transform: perspective(1200px) rotateX(0) translateY(0) translateZ(0);
+        filter: blur(0);
+      }
+    }
+
+    @keyframes hero-parallax {
+      to {
+        transform: translateY(16%) translateZ(-120px);
+        opacity: 0.25;
+      }
+    }
+
+    .hero-inner {
+      animation: hero-parallax linear forwards;
+      animation-timeline: view();
+      animation-range: exit;
+    }
+
+    .block {
+      transform-origin: 50% 100%;
+      animation: block-reveal auto cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+  }
+}
+
+// ── prefers-reduced-motion override ──────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media (max-width: 480px) {

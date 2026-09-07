@@ -7,4 +7,8 @@
   {{ $opts := dict "transpiler" "libsass" "targetPath" "css/main.css" "outputStyle" "compressed" }}
   {{ $css := resources.Get "scss/main.scss" | toCSS $opts | fingerprint }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+  {{ with resources.Get "js/ceremony.js" }}
+  {{ $js := . | minify | fingerprint }}
+  <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
+  {{ end }}
 </head>

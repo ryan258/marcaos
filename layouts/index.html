@@ -3,10 +3,15 @@
 {{ with .Site.Params.hero }}
 {{ $img := resources.Get .image }}
 <section class="hero"{{ with $img }} style="--hero: url('{{ .RelPermalink }}')"{{ end }}>
+  <div class="hero-sigil" aria-hidden="true"></div>
   <div class="hero-inner">
     <h1>{{ .name }}</h1>
     {{ with .tagline }}<p class="tagline">{{ . }}</p>{{ end }}
     {{ with .genre }}<p class="genre">{{ . }}</p>{{ end }}
+    <button class="ceremony-trigger" data-action="strike-match" type="button" aria-label="Strike match and ignite ceremony">
+      <span class="match-icon">🜂</span>
+      <span>strike the match · ignite the drop</span>
+    </button>
   </div>
   {{ with .cue }}<p class="scrollcue">{{ . }}</p>{{ end }}
 </section>
@@ -21,7 +26,7 @@
 {{ end }}
 
 {{ with .Site.Params.quotes }}
-<section class="block">
+<section class="block quotes-block">
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   {{ with .lines }}
   <ul class="quotes">
@@ -33,7 +38,7 @@
 {{ end }}
 
 {{ with .Site.Params.listen }}{{ if .links }}
-<section class="block">
+<section class="block listen-block">
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   <ul class="linkrow">
     {{ range .links }}<li><a href="{{ .url }}" rel="noopener">{{ .name }}</a></li>{{ end }}
@@ -42,7 +47,7 @@
 {{ end }}{{ end }}
 
 {{ with .Site.Params.timeline }}{{ if .entries }}
-<section class="block">
+<section class="block timeline-block">
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   <ol class="timeline">
     {{ range .entries }}
@@ -53,14 +58,14 @@
 {{ end }}{{ end }}
 
 {{ with where site.RegularPages "Section" "ceremonies" }}
-<section class="block">
+<section class="block shows-block">
   <h2>{{ site.Params.shows.heading | default "shows" }}</h2>
   {{ partial "ceremony-list.html" $ }}
 </section>
 {{ end }}
 
 {{ with .Site.Params.press }}
-<section class="block" id="press">
+<section class="block press-block" id="press">
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   {{ with .body }}<p>{{ . | markdownify }}</p>{{ end }}
   {{ with .email }}<p><a href="mailto:{{ . }}">{{ . }}</a></p>{{ end }}
