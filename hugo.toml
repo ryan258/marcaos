@@ -1,37 +1,116 @@
+# ─────────────────────────────────────────────────────────────────────
+#  ARTIST ONE-PAGE TEMPLATE
+#
+#  Ships with the "Marchaos" demo brand so it runs out of the box and
+#  shows what goes where. Replace every value below with your own.
+#
+#  - Optional sections (listen, timeline, shows) disappear when their
+#    entries are removed. Delete the whole block to hide a section.
+#  - Prose fields accept Markdown (links, *emphasis*).
+#  - Colors live in one block at the top of assets/scss/main.scss.
+#
+#  Requires Hugo extended.  `hugo server` to preview.
+# ─────────────────────────────────────────────────────────────────────
+
 baseURL = "https://www.thedropwasforetold.world/"
 title = "Marchaos"
 enableEmoji = false
+buildFuture = true   # future-dated ceremonies are upcoming shows, not drafts
 disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
 
 [languages.en]
 locale = "en-us"
 
-[params]
+[markup.goldmark.renderer]
+unsafe = true   # allow inline HTML in Markdown prose fields
+
+# ── hero ─────────────────────────────────────────────────────────────
+[params.hero]
+name    = "Marchaos"
 tagline = "the drop was foretold."
-genre = "dark progressive house · ancestral + mystic undertones"
-email = "ceremonies@thedropwasforetold.world"
+genre   = "dark progressive house · ancestral + mystic undertones"
+cue     = "the crowd doesn't dance. they receive."
+image   = "artist.jpg"   # a file inside assets/
+
+# ── about / bio ──────────────────────────────────────────────────────
+[params.about]
+heading = "the vessel"
+body = """
+they called him gypsy his whole life. a fortune teller in buenos aires told
+him he would become the international dj of the gypsy frequency. not long
+after, fate aligned. a name emerged. a set was played. a soul split.
+"""
+whisper = "marcos remained behind. marchaos walked forward."
+
+# ── press quotes ─────────────────────────────────────────────────────
+[params.quotes]
+heading = "the sound"
+texture = "deep sub-bass · 124–128 bpm · filtered bandoneon · wind textures · match strikes · reversed spanish · tape hiss · minor-key refrains"
+lines = [
+  '"like the moment before a storm became a nightclub."',
+  "\"if borges dj'd in berlin with ghost samples and a broken heart.\"",
+  '"basslines deep enough to bury secrets in."',
+]
+
+# ── listen (optional) ────────────────────────────────────────────────
+[params.listen]
+heading = "listen"
+[[params.listen.links]]
+name = "Spotify"
+url  = "#"
+[[params.listen.links]]
+name = "SoundCloud"
+url  = "#"
+[[params.listen.links]]
+name = "Bandcamp"
+url  = "#"
+
+# ── timeline (optional) ──────────────────────────────────────────────
+[params.timeline]
+heading = "prophecy timeline"
+[[params.timeline.entries]]
+label = "before"
+text  = 'tía warned he "walked with tempo."'
+[[params.timeline.entries]]
+label = "before"
+text  = 'abuelita: "cuando bailás, escuchás cosas que no están allí."'
+[[params.timeline.entries]]
+label = "the fog"
+text  = "disappeared for 3 days in parque centenario. returned changed."
+[[params.timeline.entries]]
+label = "the reading"
+text  = "the fortune teller names the gypsy frequency."
+[[params.timeline.entries]]
+label = "the split"
+text  = "a set was played. marchaos walked forward."
+[[params.timeline.entries]]
+label = "2K25"
+text  = "first album *Gypsy Nights*. world tour *The Drop Was Foretold*."
+
+# ── shows (optional) ─────────────────────────────────────────────────
+# One Markdown file per show in content/ceremonies/ (see the samples).
+# `hugo new ceremonies/paris.md` scaffolds one. Delete them all to hide
+# the section. This block only sets the heading.
+[params.shows]
+heading = "ceremonies"
+
+# ── press / booking ──────────────────────────────────────────────────
+[params.press]
+heading = "press · booking"
+body    = "epk: bio, visuals, prophecy timeline. set opens with darkness, a match strike, then kick."
+email   = "ceremonies@thedropwasforetold.world"
+whisper = "thank you for trusting the drop."
 
 [[params.social]]
 name = "@marchaos.wav"
-url = "https://instagram.com/marchaos.wav"
+url  = "https://instagram.com/marchaos.wav"
 [[params.social]]
 name = "@Marchaos"
-url = "https://soundcloud.com/Marchaos"
+url  = "https://soundcloud.com/Marchaos"
 
-# ponytail: tour dates inline here, not a data file — one brand site, one edit point
-[[params.tour]]
-date = "2K25.04.12"
-city = "Buenos Aires"
-venue = "Rooftop / undisclosed · blackout ceremony"
-[[params.tour]]
-date = "2K25.05.03"
-city = "Berlin"
-venue = "Ghost samples & a broken heart"
-[[params.tour]]
-date = "2K25.06.21"
-city = "Mexico City"
-venue = "solstice transmission"
-[[params.tour]]
-date = "2K25.09.13"
-city = "Lisbon"
-venue = "the night knew first"
+# ── footer ───────────────────────────────────────────────────────────
+[[params.footer.lines]]
+text = "marchaos is not a brand. he is a signal."
+[[params.footer.lines]]
+text = "marcos dreamed of light. marchaos stayed for the shadows."
+dim  = true

@@ -1,33 +1,36 @@
-// Marchaos — dark progressive house. posters printed by the void.
-// ponytail: single stylesheet, libsass-safe (no @use/modules) — Hugo extended ships libsass, dart-sass not installed
+// ═══════════════════════════════════════════════════════════════════
+//  COLORS — edit these six values to re-skin the whole site.
+//  Every tint, border and glow below is derived from them.
+// ═══════════════════════════════════════════════════════════════════
+$bg:      #0b0908;   // page background      (near-black)
+$text:    #cbb9a3;   // body text           (bone / paper)
+$muted:   #7d6f5f;   // captions, dim text
+$accent:  #d0011b;   // primary accent — links, dates     (ritual red)
+$accent2: #7f00ff;   // secondary accent — glows          (spectral violet)
+$rule:    #b87333;   // hairlines, rules                  (copper)
+// ═══════════════════════════════════════════════════════════════════
 
-$obsidian:   #0b0908;
-$sepia-black: #14100c;
-$smoke:      #2a221b;
-$paper:      #cbb9a3;
-$paper-dim:  #7d6f5f;
-$ritual-red: #d0011b;
-$violet:     #7f00ff;
-$copper:     #b87333;
+// ponytail: colors are static SCSS vars, not runtime CSS custom props —
+// keeps rgba()/lighten() working under Hugo's bundled libsass.
+// Upgrade path: install dart-sass, emit :root vars from [params.theme].
 
 $serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-$mono: "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
+$mono:  "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
 
 @mixin section {
   max-width: 46rem;
   margin: 0 auto;
   padding: 6rem 1.5rem;
-  border-bottom: 1px solid rgba($copper, 0.12);
+  border-bottom: 1px solid rgba($rule, 0.12);
 }
 
 * { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: $obsidian;
-  color: $paper;
+  background: $bg;
+  color: $text;
   font: 400 1.0625rem/1.7 $serif;
   letter-spacing: 0.01em;
   text-rendering: optimizeLegibility;
@@ -37,7 +40,7 @@ h1, h2 {
   font-weight: 400;
   text-transform: lowercase;
   letter-spacing: 0.04em;
-  color: $paper;
+  color: $text;
 }
 
 h2 {
@@ -45,20 +48,21 @@ h2 {
   font-family: $mono;
   text-transform: uppercase;
   letter-spacing: 0.35em;
-  color: $copper;
+  color: $rule;
   margin: 0 0 2rem;
 }
 
 a {
-  color: $ritual-red;
+  color: $accent;
   text-decoration: none;
-  border-bottom: 1px solid rgba($ritual-red, 0.4);
-  &:hover { color: lighten($ritual-red, 12%); }
+  border-bottom: 1px solid rgba($accent, 0.4);
+  &:hover { color: lighten($accent, 12%); }
 }
 
-.whisper { color: $paper-dim; font-style: italic; }
+.whisper { color: $muted; font-style: italic; }
+.block li > p { display: inline; margin: 0; }   // unwrap markdownify inside list items
 
-// --- hero ---------------------------------------------------------------
+// ── hero ─────────────────────────────────────────────────────────
 .hero {
   position: relative;
   min-height: 100vh;
@@ -69,8 +73,8 @@ a {
   text-align: center;
   padding: 2rem 1.5rem 4rem;
   background:
-    radial-gradient(ellipse at center, rgba($obsidian, 0.55) 0%, rgba($obsidian, 0.92) 70%, $obsidian 100%),
-    var(--hero) center / cover no-repeat;
+    radial-gradient(ellipse at center, rgba($bg, 0.55) 0%, rgba($bg, 0.92) 70%, $bg 100%),
+    var(--hero, none) center / cover no-repeat;
   filter: saturate(0.6) sepia(0.35);
 
   &-inner { max-width: 40rem; }
@@ -79,7 +83,7 @@ a {
     font-size: clamp(3rem, 12vw, 7rem);
     margin: 0;
     letter-spacing: 0.06em;
-    text-shadow: 0 0 40px rgba($violet, 0.35);
+    text-shadow: 0 0 40px rgba($accent2, 0.35);
   }
 
   .tagline {
@@ -87,11 +91,11 @@ a {
     text-transform: uppercase;
     letter-spacing: 0.4em;
     font-size: 0.8rem;
-    color: $ritual-red;
+    color: $accent;
     margin: 1.5rem 0 0;
   }
 
-  .genre { color: $paper-dim; font-size: 0.95rem; margin-top: 0.75rem; }
+  .genre { color: $muted; font-size: 0.95rem; margin-top: 0.75rem; }
 
   .scrollcue {
     position: absolute;
@@ -100,40 +104,58 @@ a {
     font-size: 0.7rem;
     letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: $paper-dim;
+    color: $muted;
   }
 }
 
-// --- generic sections -------------------------------------------------
-.origin, .sound, .prophecy, .tour, .epk { @include section; }
+// ── sections ─────────────────────────────────────────────────────
+.block { @include section; }
+.block p:first-of-type { margin-top: 0; }
 
 .quotes {
   list-style: none;
   padding: 0;
   margin: 0 0 2rem;
+
   li {
     font-style: italic;
-    color: $paper;
-    padding: 0.6rem 0;
-    border-left: 2px solid rgba($violet, 0.5);
-    padding-left: 1.2rem;
+    color: $text;
+    padding: 0.6rem 0 0.6rem 1.2rem;
+    border-left: 2px solid rgba($accent2, 0.5);
     margin-bottom: 0.5rem;
   }
 }
 
-.spec, .genre { font-family: $mono; font-size: 0.8rem; letter-spacing: 0.08em; color: $paper-dim; }
+.spec {
+  font-family: $mono;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: $muted;
+}
 
-// --- timeline -------------------------------------------------------
+// ── link rows (listen, social) ───────────────────────────────────
+.linkrow {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-family: $mono;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+// ── timeline ─────────────────────────────────────────────────────
 .timeline {
   list-style: none;
   padding: 0;
   margin: 0;
-  counter-reset: step;
 
   li {
     position: relative;
     padding: 0 0 1.6rem 2rem;
-    border-left: 1px solid rgba($copper, 0.3);
+    border-left: 1px solid rgba($rule, 0.3);
 
     &::before {
       content: "";
@@ -142,9 +164,9 @@ a {
       top: 0.5rem;
       width: 9px;
       height: 9px;
-      background: $ritual-red;
+      background: $accent;
       border-radius: 50%;
-      box-shadow: 0 0 12px rgba($ritual-red, 0.8);
+      box-shadow: 0 0 12px rgba($accent, 0.8);
     }
 
     span {
@@ -153,13 +175,13 @@ a {
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.3em;
-      color: $copper;
+      color: $rule;
       margin-bottom: 0.25rem;
     }
   }
 }
 
-// --- tour dates ---------------------------------------------------
+// ── show dates ───────────────────────────────────────────────────
 .dates {
   list-style: none;
   padding: 0;
@@ -167,40 +189,39 @@ a {
 
   li {
     display: grid;
-    grid-template-columns: 7rem 1fr;
+    grid-template-columns: 7rem 1fr auto;
     gap: 0.25rem 1.5rem;
     padding: 1.1rem 0;
-    border-top: 1px solid rgba($copper, 0.15);
-    &:last-child { border-bottom: 1px solid rgba($copper, 0.15); }
+    border-top: 1px solid rgba($rule, 0.15);
+    &:last-child { border-bottom: 1px solid rgba($rule, 0.15); }
   }
 
-  .d { font-family: $mono; color: $ritual-red; font-size: 0.85rem; align-self: center; }
-  .c { font-size: 1.2rem; }
-  .v { grid-column: 2; color: $paper-dim; font-size: 0.9rem; }
+  .d { font-family: $mono; color: $accent; font-size: 0.85rem; align-self: center; }
+  .c { font-size: 1.2rem; a { color: $text; border-bottom-color: rgba($text, 0.25); } }
+  .v { grid-column: 2; color: $muted; font-size: 0.9rem; }
+  .t {
+    grid-row: 1;
+    grid-column: 3;
+    align-self: center;
+    font-family: $mono;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
 }
 
-// --- epk / social -----------------------------------------------
-.social {
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem 0;
-  display: flex;
-  gap: 1.5rem;
-  font-family: $mono;
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
-}
-
-// --- footer ---------------------------------------------------
+// ── footer ───────────────────────────────────────────────────────
 footer {
   text-align: center;
   padding: 4rem 1.5rem 5rem;
-  color: $paper-dim;
+  color: $muted;
   font-size: 0.9rem;
   p { margin: 0.4rem 0; }
 }
 
 @media (max-width: 480px) {
   .dates li { grid-template-columns: 1fr; }
-  .dates .v { grid-column: 1; }
+  .dates .v,
+  .dates .t { grid-column: 1; }
+  .dates .t { grid-row: auto; justify-self: start; }
 }
