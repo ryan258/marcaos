@@ -1,0 +1,12 @@
+{{ define "main" }}
+<article class="block">
+  <p class="spec">
+    {{- with .Params.dateLabel }}{{ . }}{{ else }}{{ .Date.Format "Monday, 2 January 2006" }}{{ end -}}
+    {{ with .Params.venue }} · {{ . | markdownify }}{{ end }}
+  </p>
+  <h2>{{ .Title }}</h2>
+  {{ .Content }}
+  {{ with .Params.tickets }}<p><a href="{{ . }}" rel="noopener">tickets</a></p>{{ end }}
+  <p><a href="{{ with .Parent }}{{ .RelPermalink }}{{ else }}{{ site.Home.RelPermalink }}{{ end }}">← all ceremonies</a></p>
+</article>
+{{ end }}

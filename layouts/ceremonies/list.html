@@ -1,0 +1,7 @@
+{{ define "main" }}
+<section class="block">
+  <h2>{{ .Title }}</h2>
+  {{ with .Content }}{{ . }}{{ end }}
+  {{ partial "ceremony-list.html" . }}
+</section>
+{{ end }}

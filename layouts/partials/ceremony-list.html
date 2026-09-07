@@ -1,0 +1,13 @@
+{{ $pages := where .Site.RegularPages "Section" "ceremonies" }}
+{{ with $pages }}
+<ul class="dates">
+  {{ range .ByDate }}
+  <li>
+    <span class="d">{{ with .Params.dateLabel }}{{ . }}{{ else }}{{ .Date.Format "2006.01.02" }}{{ end }}</span>
+    <span class="c"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
+    {{ with .Params.venue }}<span class="v">{{ . | markdownify }}</span>{{ end }}
+    {{ with .Params.tickets }}<span class="t"><a href="{{ . }}" rel="noopener">tickets</a></span>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ end }}
