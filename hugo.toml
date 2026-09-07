@@ -1,0 +1,37 @@
+baseURL = "https://www.thedropwasforetold.world/"
+title = "Marchaos"
+enableEmoji = false
+disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
+
+[languages.en]
+locale = "en-us"
+
+[params]
+tagline = "the drop was foretold."
+genre = "dark progressive house · ancestral + mystic undertones"
+email = "ceremonies@thedropwasforetold.world"
+
+[[params.social]]
+name = "@marchaos.wav"
+url = "https://instagram.com/marchaos.wav"
+[[params.social]]
+name = "@Marchaos"
+url = "https://soundcloud.com/Marchaos"
+
+# ponytail: tour dates inline here, not a data file — one brand site, one edit point
+[[params.tour]]
+date = "2K25.04.12"
+city = "Buenos Aires"
+venue = "Rooftop / undisclosed · blackout ceremony"
+[[params.tour]]
+date = "2K25.05.03"
+city = "Berlin"
+venue = "Ghost samples & a broken heart"
+[[params.tour]]
+date = "2K25.06.21"
+city = "Mexico City"
+venue = "solstice transmission"
+[[params.tour]]
+date = "2K25.09.13"
+city = "Lisbon"
+venue = "the night knew first"
