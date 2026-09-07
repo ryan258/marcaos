@@ -5,9 +5,10 @@
   <main>
     {{ block "main" . }}{{ end }}
   </main>
+  {{ with .Site.Params.footer.lines }}
   <footer>
-    <p>marchaos is not a brand. he is a signal.</p>
-    <p class="whisper">marcos dreamed of light. marchaos stayed for the shadows.</p>
+    {{ range . }}<p{{ if .dim }} class="whisper"{{ end }}>{{ .text | markdownify }}</p>{{ end }}
   </footer>
+  {{ end }}
 </body>
 </html>
