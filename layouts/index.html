@@ -3,15 +3,30 @@
 {{ with .Site.Params.hero }}
 {{ $img := resources.Get .image }}
 <section class="hero"{{ with $img }} style="--hero: url('{{ .RelPermalink }}')"{{ end }}>
+  <!-- Plane 1: translateZ(-200px) — cosmic void constellation -->
+  <div class="hero-plane-void" aria-hidden="true"></div>
+  <!-- Plane 2: translateZ(-100px) — alchemical sigil halo -->
   <div class="hero-sigil" aria-hidden="true"></div>
   <div class="hero-inner">
-    <h1>{{ .name }}</h1>
-    {{ with .tagline }}<p class="tagline">{{ . }}</p>{{ end }}
-    {{ with .genre }}<p class="genre">{{ . }}</p>{{ end }}
-    <button class="ceremony-trigger" data-action="strike-match" type="button" aria-label="{{ i18n "strike_match_aria" }}">
-      <svg class="match-icon match-morph" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 C6 5 4 6 4 9 C4 12 6 14 8 14 C10 14 12 12 12 9 C12 6 10 5 8 1 Z"/></svg>
-      <span>{{ i18n "strike_match" }}</span>
-    </button>
+    <!-- Plane 3: translateZ(0px) — core identity title -->
+    <div class="hero-plane-artist">
+      <h1 class="hero-title">{{ .name }}</h1>
+    </div>
+    <!-- Plane 4: translateZ(50px) — tagline, genre, ritual match button -->
+    <div class="hero-plane-accent">
+      {{ with .tagline }}<p class="tagline">{{ . }}</p>{{ end }}
+      {{ with .genre }}<p class="genre">{{ . }}</p>{{ end }}
+      <button class="ceremony-trigger" data-action="strike-match" type="button" aria-label="{{ i18n "strike_match_aria" }}">
+        <svg class="match-icon match-morph" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 C6 5 4 6 4 9 C4 12 6 14 8 14 C10 14 12 12 12 9 C12 6 10 5 8 1 Z"/></svg>
+        <span>{{ i18n "strike_match" }}</span>
+      </button>
+    </div>
+    <!-- Plane 5: translateZ(100px) — floating embers & foreground dust -->
+    <div class="hero-plane-fore" aria-hidden="true">
+      <span class="floating-ember ember-1">✦</span>
+      <span class="floating-ember ember-2">🜂</span>
+      <span class="floating-ember ember-3">✧</span>
+    </div>
   </div>
   {{ with .cue }}<p class="scrollcue">{{ . }}</p>{{ end }}
 </section>
@@ -24,18 +39,39 @@
   {{ with .body }}<p>{{ . | markdownify }}</p>{{ end }}
   {{ with .whisper }}<p class="whisper">{{ . }}</p>{{ end }}
   <p class="whisper marcos-memory-note" hidden><span class="alch-marker">☿</span> <span class="redacted" tabindex="0">marcos disappeared for 3 days in parque centenario, returned changed</span></p>
+  <div class="whisper-anchors">
+    <span class="whisper-anchor-target whisper-target-prophecy" id="target-prophecy" tabindex="0">
+      <span class="anchor-tag">✦ {{ i18n "whisper_prophecy_tag" }}</span>
+      <span class="anchor-whisper-bubble" role="tooltip">"{{ i18n "whisper_prophecy_text" }}"</span>
+    </span>
+    <span class="whisper-anchor-target whisper-target-vessel" id="target-vessel" tabindex="0">
+      <span class="anchor-tag">☿ {{ i18n "whisper_vessel_tag" }}</span>
+      <span class="anchor-whisper-bubble" role="tooltip">"{{ i18n "whisper_vessel_text" }}"</span>
+    </span>
+  </div>
 </section>
 {{ end }}
 
 {{ with .Site.Params.quotes }}
-<section class="block quotes-block">
+<section class="block quotes-block" id="quotes">
   <span class="alch-badge" aria-hidden="true">🜃</span>
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
-  {{ with .lines }}
-  <ul class="quotes">
-    {{ range . }}<li>{{ . | markdownify }}</li>{{ end }}
-  </ul>
-  {{ end }}
+  <div class="ritual-altar-stage">
+    <div class="ritual-altar" aria-hidden="true">
+      <div class="altar-ring altar-ring-outer"></div>
+      <div class="altar-ring altar-ring-inner"></div>
+      <div class="altar-talisman">🜂</div>
+    </div>
+    {{ with .lines }}
+    <ul class="quotes quotes-carousel">
+      {{ range $idx, $line := . }}
+      <li class="quote-line" style="--quote-idx: {{ $idx }}">
+        <div class="quote-inner">{{ $line | markdownify }}</div>
+      </li>
+      {{ end }}
+    </ul>
+    {{ end }}
+  </div>
   {{ with .texture }}<p class="spec">{{ . }}</p>{{ end }}
 </section>
 {{ end }}
@@ -87,7 +123,9 @@
 </section>
 
 {{ with where site.RegularPages "Section" "ceremonies" }}
-<section class="block shows-block">
+<section class="block shows-block bellows-stage" id="shows">
+  <div class="bellows-fold bellows-left" aria-hidden="true"></div>
+  <div class="bellows-fold bellows-right" aria-hidden="true"></div>
   <span class="alch-badge" aria-hidden="true">🜄</span>
   <h2>{{ site.Params.shows.heading | default "shows" }}</h2>
   {{ with (where . "Date" "gt" now).ByDate }}
@@ -117,4 +155,15 @@
 </section>
 {{ end }}
 
+<div class="booking-bar-wrapper">
+  <aside class="booking-bar" role="complementary" aria-label="{{ i18n "booking_title" }}">
+    <div class="booking-bar-content">
+      <span class="booking-badge">{{ i18n "booking_badge" }}</span>
+      <span class="booking-bar-title">{{ i18n "booking_title" }}</span>
+      <a href="#shows" class="booking-bar-btn">{{ i18n "booking_cta" }}</a>
+    </div>
+  </aside>
+</div>
+
 {{ end }}
+

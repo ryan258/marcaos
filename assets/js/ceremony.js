@@ -1107,6 +1107,149 @@
     });
   }
 
+  // ── Gypsy Frequency Waveform Rail (#40) ───────────────────────────
+  // Vertical waveform path on the left margin that deforms and spikes
+  // as the user scrolls past sound quotes and listen sections.
+  function bindWaveformRail() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rail = document.querySelector('.waveform-rail');
+    if (!rail) return;
+    const path = rail.querySelector('.waveform-path');
+    if (!path) return;
+
+    const quotesBlock = document.querySelector('.quotes-block');
+    const listenBlock = document.querySelector('.listen-block');
+    if (!quotesBlock && !listenBlock) return;
+
+    let raf = 0;
+    let t = 0;
+    let quoteProximity = 0;
+    let isNearQuotes = false;
+
+    const pointsCount = 24;
+    const height = 1000;
+    const step = height / (pointsCount - 1);
+
+    const updateProximity = () => {
+      if (!isNearQuotes) {
+        quoteProximity = 0;
+        return;
+      }
+      const vh = window.innerHeight;
+      let prox = 0;
+      if (quotesBlock) {
+        const r = quotesBlock.getBoundingClientRect();
+        if (r.top < vh && r.bottom > 0) {
+          prox = Math.max(prox, 1 - Math.abs((r.top + r.height / 2) - vh / 2) / vh);
+        }
+      }
+      if (listenBlock) {
+        const r = listenBlock.getBoundingClientRect();
+        if (r.top < vh && r.bottom > 0) {
+          prox = Math.max(prox, 1 - Math.abs((r.top + r.height / 2) - vh / 2) / vh);
+        }
+      }
+      quoteProximity = Math.max(0, Math.min(1, prox));
+    };
+
+    const render = () => {
+      t += 0.08;
+      rail.classList.toggle('spiking', quoteProximity > 0.2);
+
+      let d = 'M 16 0 ';
+      for (let i = 1; i < pointsCount - 1; i++) {
+        const y = i * step;
+        const normY = y / height;
+        const baseSine = Math.sin(t * 1.5 + normY * 8) * 3;
+        const spike = quoteProximity > 0
+          ? Math.sin(t * 4 + normY * 20) * (8 * quoteProximity) + (Math.sin(t * 9 + normY * 35) * 5 * quoteProximity)
+          : 0;
+        const x = Math.max(2, Math.min(30, 16 + baseSine + spike));
+        d += `L ${x.toFixed(1)} ${y.toFixed(1)} `;
+      }
+      d += `L 16 ${height}`;
+      path.setAttribute('d', d);
+
+      if (isNearQuotes) {
+        raf = requestAnimationFrame(render);
+      } else {
+        raf = 0;
+      }
+    };
+
+    const startLoop = () => {
+      if (!raf) raf = requestAnimationFrame(render);
+    };
+
+    if ('IntersectionObserver' in window) {
+      const active = new Set();
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((e) => (e.isIntersecting ? active.add(e.target) : active.delete(e.target)));
+        isNearQuotes = active.size > 0;
+        updateProximity();
+        if (isNearQuotes) {
+          startLoop();
+        } else {
+          if (raf) {
+            cancelAnimationFrame(raf);
+            raf = 0;
+          }
+          rail.classList.remove('spiking');
+          path.setAttribute('d', `M 16 0 L 16 ${height}`);
+        }
+      }, { rootMargin: '120px 0px' });
+
+      if (quotesBlock) observer.observe(quotesBlock);
+      if (listenBlock) observer.observe(listenBlock);
+
+      window.addEventListener('scroll', updateProximity, { passive: true });
+    }
+  }
+
+  // ── Fallbacks for browsers without CSS Scroll-Driven / Scroll-State APIs ──
+  function bindSpatialFallbacks() {
+    // Fallback for ViewTimeline Quote Reveals (#36)
+    if (!CSS.supports('animation-timeline: view()') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const quoteLines = document.querySelectorAll('.quote-line');
+      if (quoteLines.length && 'IntersectionObserver' in window) {
+        const quoteObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'none';
+              entry.target.style.filter = 'none';
+              quoteObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15 });
+        quoteLines.forEach((el) => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(1.5rem)';
+          el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+          quoteObserver.observe(el);
+        });
+      }
+    }
+
+    // Fallback for Scroll-State Booking Bar (#44)
+    if (!CSS.supports('container-type: scroll-state')) {
+      const bookingBar = document.querySelector('.booking-bar');
+      const bookingContainer = document.querySelector('.booking-bar-wrapper');
+      if (bookingBar && bookingContainer && 'IntersectionObserver' in window) {
+        const sentinel = document.createElement('div');
+        sentinel.style.height = '1px';
+        sentinel.style.marginBottom = '-1px';
+        bookingContainer.parentNode.insertBefore(sentinel, bookingContainer);
+
+        const observer = new IntersectionObserver(([entry]) => {
+          const isStuck = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+          bookingBar.classList.toggle('stuck', isStuck);
+        }, { threshold: 0 });
+        observer.observe(sentinel);
+      }
+    }
+  }
+
   // Bind igniter triggers & ritual listeners
   document.addEventListener('DOMContentLoaded', () => {
     const strikeTriggers = document.querySelectorAll('[data-action="strike-match"]');
@@ -1132,6 +1275,8 @@
     bindRadioTuner();
     bindMatchGate();
     bindTarotOracle();
+    bindWaveformRail();
+    bindSpatialFallbacks();
     registerServiceWorker();
   });
 })();

@@ -228,22 +228,28 @@ body.camera-shake {
     var(--hero, none) center / cover no-repeat;
   filter: saturate(0.6) sepia(0.35);
 
-  // pointer-parallax stage — --px/--py set by ceremony.js, default flat
+  // pointer-parallax 5-plane 3D stage (#31) — --px/--py set by ceremony.js
   --px: 0;
   --py: 0;
-  perspective: 900px;
+  perspective: 1000px;
   perspective-origin: 50% 40%;
   transform-style: preserve-3d;
   overflow: hidden;
 
-  &-inner {
-    max-width: 40rem;
-    position: relative;
-    z-index: 1;
-    transform-style: preserve-3d;
+  // Plane 1: translateZ(-200px) — deep cosmic void & alchemical field
+  .hero-plane-void {
+    position: absolute;
+    inset: -25%;
+    z-index: 0;
+    pointer-events: none;
+    transform: translateZ(-200px);
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba($accent2, 0.12) 0%, transparent 60%),
+      radial-gradient(circle at 30% 40%, rgba($accent, 0.08) 0%, transparent 50%);
+    will-change: transform;
   }
 
-  // slow-turning halo laid ~64° back into the floor behind the title
+  // Plane 2: translateZ(-100px) — slow-turning halo laid ~64° back into the floor
   .hero-sigil {
     position: absolute;
     top: 46%;
@@ -251,10 +257,10 @@ body.camera-shake {
     width: #{"min(66vmin, 34rem)"};   // interpolated — libsass would try to eval min()
     aspect-ratio: 1;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
     mix-blend-mode: screen;
     opacity: 0.55;
-    transform: translate(-50%, -50%) rotateX(64deg);
+    transform: translate(-50%, -50%) rotateX(64deg) translateZ(-100px);
     transform-style: preserve-3d;
     will-change: transform;
     background: conic-gradient(from 0deg,
@@ -284,28 +290,56 @@ body.camera-shake {
     }
   }
 
-  h1 {
-    font-size: clamp(3rem, 12vw, 7rem);
-    margin: 0;
-    letter-spacing: 0.06em;
-    animation: bass-pulse $tempo-bar infinite ease-in-out;
+  &-inner {
+    max-width: 40rem;
+    position: relative;
+    z-index: 2;
+    transform-style: preserve-3d;
   }
 
-  .tagline {
-    font-family: $mono;
-    text-transform: uppercase;
-    letter-spacing: 0.4em;
-    font-size: 0.8rem;
-    color: $accent;
-    margin: 1.5rem 0 0;
-    text-wrap: balance;
+  // Plane 3: translateZ(0px) — artist headline anchor
+  .hero-plane-artist {
+    transform: translateZ(0px);
+    transform-style: preserve-3d;
+    will-change: transform;
+
+    .hero-title {
+      font-size: clamp(3rem, 12vw, 7rem);
+      margin: 0;
+      letter-spacing: 0.06em;
+      animation: bass-pulse $tempo-bar infinite ease-in-out;
+      text-wrap: balance;
+    }
   }
 
-  .genre { color: $muted; font-size: 0.95rem; margin-top: 0.75rem; }
+  // Plane 4: translateZ(50px) — tagline, genre, and ritual match strike button
+  .hero-plane-accent {
+    transform: translateZ(50px);
+    transform-style: preserve-3d;
+    will-change: transform;
+    margin-top: 1rem;
+
+    .tagline {
+      font-family: $mono;
+      text-transform: uppercase;
+      letter-spacing: 0.4em;
+      font-size: 0.8rem;
+      color: $accent;
+      margin: 0.5rem 0 0;
+      text-wrap: balance;
+    }
+
+    .genre {
+      color: $muted;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+      text-wrap: balance;
+    }
+  }
 
   .ceremony-trigger {
     anchor-name: --ceremony-trigger;
-    margin-top: 2rem;
+    margin-top: 1.8rem;
     background: transparent;
     border: 1px solid rgba($rule, 0.4);
     color: $text;
@@ -336,6 +370,27 @@ body.camera-shake {
     }
   }
 
+  // Plane 5: translateZ(100px) — floating embers & scroll cue
+  .hero-plane-fore {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateZ(100px);
+    transform-style: preserve-3d;
+    z-index: 4;
+
+    .floating-ember {
+      position: absolute;
+      color: rgba($accent, 0.75);
+      font-size: 0.85rem;
+      filter: drop-shadow(0 0 8px $accent);
+      user-select: none;
+    }
+    .ember-1 { top: 20%; left: 15%; animation: sigil-drift 8s ease-in-out infinite alternate; }
+    .ember-2 { top: 75%; right: 18%; animation: sigil-drift-rev 10s ease-in-out infinite alternate; }
+    .ember-3 { bottom: 15%; left: 35%; animation: sigil-drift 12s ease-in-out infinite alternate; }
+  }
+
   .scrollcue {
     position: absolute;
     bottom: 2rem;
@@ -344,6 +399,7 @@ body.camera-shake {
     letter-spacing: 0.25em;
     text-transform: uppercase;
     color: $muted;
+    text-wrap: balance;
 
     @supports (position-anchor: --ceremony-trigger) {
       position-anchor: --ceremony-trigger;
@@ -392,25 +448,357 @@ body.ceremony-active {
   }
 }
 
+// ── anchor-positioned whispers (#42) ──────────────────────────────
+@property --bubble-shift {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 6px;
+}
+
+.whisper-anchors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.2rem;
+}
+
+.whisper-anchor-target {
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+
+  .anchor-tag {
+    font-family: $mono;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba($text, 0.85);
+    border-bottom: 1px dotted rgba($accent, 0.6);
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  &:hover .anchor-tag,
+  &:focus .anchor-tag {
+    color: $accent;
+    border-bottom-color: $accent;
+  }
+
+  .anchor-whisper-bubble {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    font-family: $serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: lighten($text, 15%);
+    background: rgba($bg, 0.95);
+    border: 1px solid rgba($accent, 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 12px rgba($accent, 0.25);
+    padding: 0.5rem 0.9rem;
+    border-radius: 3px;
+    width: max-content;
+    max-width: 18rem;
+    z-index: 120;
+    text-wrap: pretty;
+    --bubble-shift: 6px;
+    transform: translateY(var(--bubble-shift));
+    transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease, --bubble-shift 0.25s ease;
+  }
+
+  &:hover .anchor-whisper-bubble,
+  &:focus-within .anchor-whisper-bubble {
+    opacity: 1;
+    visibility: visible;
+    --bubble-shift: 0px;
+  }
+}
+
+.whisper-target-prophecy {
+  anchor-name: --anchor-prophecy;
+  .anchor-whisper-bubble {
+    @supports (position-anchor: --anchor-prophecy) {
+      position: fixed;
+      position-anchor: --anchor-prophecy;
+      top: #{"anchor(bottom)"};
+      left: #{"anchor(center)"};
+      transform: translateX(-50%) translateY(var(--bubble-shift, 0));
+      margin-top: 8px;
+    }
+  }
+}
+
+.whisper-target-vessel {
+  anchor-name: --anchor-vessel;
+  .anchor-whisper-bubble {
+    @supports (position-anchor: --anchor-vessel) {
+      position: fixed;
+      position-anchor: --anchor-vessel;
+      top: #{"anchor(bottom)"};
+      left: #{"anchor(center)"};
+      transform: translateX(-50%) translateY(var(--bubble-shift, 0));
+      margin-top: 8px;
+    }
+  }
+}
+
+// ── sticky ritual altar & quotes 3D stage (#36, #37) ──────────────
+.ritual-altar-stage {
+  position: relative;
+  min-height: 20rem;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  margin: 1.5rem 0 2rem;
+}
+
+.ritual-altar {
+  position: sticky;
+  top: 50vh;
+  margin-inline: auto;
+  transform: translateY(-50%);
+  width: 4.5rem;
+  height: 4.5rem;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .altar-ring {
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  .altar-ring-outer {
+    inset: -1.2rem;
+    border: 1px dashed rgba($accent2, 0.45);
+    animation: sigil-drift ($tempo-phrase * 4) linear infinite;
+  }
+
+  .altar-ring-inner {
+    inset: -0.4rem;
+    border: 1px dashed rgba($accent, 0.55);
+    animation: sigil-drift-rev ($tempo-phrase * 2) linear infinite;
+  }
+
+  .altar-talisman {
+    font-size: 1.8rem;
+    color: $accent;
+    filter: drop-shadow(0 0 14px rgba($accent, 0.9));
+    animation: bass-pulse $tempo-bar infinite ease-in-out;
+  }
+}
+
 .quotes {
   list-style: none;
   padding: 0;
   margin: 0 0 2rem;
+  transform-style: preserve-3d;
 
-  li {
+  .quote-line {
+    margin-bottom: 1.2rem;
+    transform-style: preserve-3d;
+  }
+
+  .quote-inner {
     font-style: italic;
     color: $text;
-    padding: 0.6rem 0 0.6rem 1.2rem;
+    padding: 0.8rem 1.2rem;
     border-left: 2px solid rgba($accent2, 0.5);
-    margin-bottom: 0.5rem;
-    transition: border-left-color 0.3s ease;
+    background: rgba($bg, 0.45);
+    backdrop-filter: blur(4px);
+    border-radius: 2px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    transition: border-left-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     text-wrap: pretty;
 
     &:hover {
       border-left-color: $accent;
+      box-shadow: 0 6px 26px rgba($accent, 0.25);
+      transform: translateY(-4px) scale(1.01);
     }
   }
 }
+
+// ── scroll-linked bandoneón bellows (#38) ─────────────────────────
+.bellows-stage {
+  position: relative;
+  transition: padding 0.3s ease;
+
+  .bellows-fold {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 14px;
+    pointer-events: none;
+    opacity: 0.4;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba($rule, 0.55) 0,
+      rgba($rule, 0.55) 3px,
+      transparent 3px,
+      transparent 10px
+    );
+  }
+
+  .bellows-left {
+    left: -1rem;
+    border-right: 1px solid rgba($accent, 0.35);
+  }
+
+  .bellows-right {
+    right: -1rem;
+    border-left: 1px solid rgba($accent, 0.35);
+  }
+}
+
+// ── gypsy frequency waveform rail (#40) ───────────────────────────
+.waveform-rail {
+  position: fixed;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  z-index: 82;
+  opacity: 0.45;
+  display: flex;
+  align-items: center;
+
+  .waveform-svg {
+    width: 100%;
+    height: 75vh;
+    margin: auto 0;
+  }
+
+  .waveform-path {
+    stroke: rgba($accent, 0.45);
+    stroke-width: 1.5px;
+    fill: none;
+    filter: drop-shadow(0 0 5px rgba($accent, 0.7));
+    transition: stroke 0.3s ease, filter 0.3s ease;
+  }
+
+  &.spiking .waveform-path {
+    stroke: lighten($accent, 15%);
+    filter: drop-shadow(0 0 12px $accent) drop-shadow(0 0 20px $accent2);
+    stroke-width: 2.2px;
+  }
+}
+
+// ── inverse parallax fog (#41) ────────────────────────────────────
+.fog-inverse {
+  position: fixed;
+  inset: -25%;
+  pointer-events: none;
+  z-index: 97;
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  background: repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='fi'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.009' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23fi)' opacity='0.55'/%3E%3C/svg%3E");
+  -webkit-mask: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
+          mask: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
+}
+
+// ── scroll-state sticky booking bar (#44) ─────────────────────────
+.booking-bar-wrapper {
+  position: sticky;
+  bottom: 0;
+  z-index: 88;
+  width: 100%;
+  pointer-events: none;
+  margin-top: 2rem;
+  container-type: scroll-state;
+}
+
+.booking-bar {
+  pointer-events: auto;
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 0.6rem 1.2rem;
+  background: rgba($bg, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba($rule, 0.25);
+  border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .booking-bar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .booking-badge {
+    font-family: $mono;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    padding: 0.2rem 0.55rem;
+    background: rgba($accent, 0.18);
+    border: 1px solid rgba($accent, 0.4);
+    color: $accent;
+    border-radius: 2px;
+  }
+
+  .booking-bar-title {
+    font-family: $mono;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: $text;
+    text-wrap: balance;
+  }
+
+  .booking-bar-btn {
+    font-family: $mono;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    padding: 0.35rem 0.85rem;
+    background: rgba($accent, 0.15);
+    border: 1px solid rgba($accent, 0.55);
+    color: $text;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background: $accent;
+      color: #fff;
+      box-shadow: 0 0 14px rgba($accent, 0.7);
+    }
+  }
+}
+
+.booking-bar.stuck {
+  background: rgba($bg, 0.95);
+  border-color: rgba($accent, 0.6);
+  box-shadow: 0 -4px 20px rgba($accent, 0.25), 0 -1px 8px rgba($accent2, 0.3);
+  padding: 0.8rem 1.6rem;
+  border-radius: 6px 6px 0 0;
+  transform: translateY(-2px);
+}
+
+@supports (container-type: scroll-state) {
+  @container scroll-state(stuck: bottom) {
+    .booking-bar {
+      background: rgba($bg, 0.95);
+      border-color: rgba($accent, 0.6);
+      box-shadow: 0 -4px 20px rgba($accent, 0.25), 0 -1px 8px rgba($accent2, 0.3);
+      padding: 0.8rem 1.6rem;
+      border-radius: 6px 6px 0 0;
+      transform: translateY(-2px);
+    }
+  }
+}
+
 
 .spec {
   font-family: $mono;
@@ -561,19 +949,45 @@ footer {
   p { margin: 0.4rem 0; }
 }
 
-// ── parallax — hero title floats toward cursor or gyroscope tilt ──
+// ── parallax — 5-plane 3D stage shifting with pointer or gyroscope tilt (#31) ──
 @media (prefers-reduced-motion: no-preference) {
-  .hero-inner {
+  .hero-plane-void {
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     transform:
-      translateZ(40px)
+      translateZ(-200px)
+      scale(1.2)
+      translate(calc(var(--px) * -35px), calc(var(--py) * -25px));
+  }
+  .hero-sigil {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform:
+      translate(calc(-50% + var(--px) * 2rem), calc(-50% + var(--py) * 1.5rem))
+      rotateX(64deg)
+      translateZ(-100px);
+  }
+  .hero-plane-artist {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform:
+      translateZ(0px)
+      translate(calc(var(--px) * 12px), calc(var(--py) * 8px))
+      rotateX(calc(var(--py) * -3deg))
+      rotateY(calc(var(--px) * 3deg));
+  }
+  .hero-plane-accent {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform:
+      translateZ(50px)
+      translate(calc(var(--px) * 26px), calc(var(--py) * 18px))
       rotateX(calc(var(--py) * -6deg))
       rotateY(calc(var(--px) * 6deg));
   }
-  .hero-sigil {
+  .hero-plane-fore {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     transform:
-      translate(calc(-50% + var(--px) * 1.4rem), calc(-50% + var(--py) * 1rem))
-      rotateX(64deg);
+      translateZ(100px)
+      translate(calc(var(--px) * 50px), calc(var(--py) * 35px))
+      rotateX(calc(var(--py) * -9deg))
+      rotateY(calc(var(--px) * 9deg));
   }
 }
 
@@ -613,17 +1027,87 @@ footer {
       animation-range: entry 0% cover 30%;
     }
 
+    // #36 — view-timeline staggered quote reveal
+    @keyframes quote-reveal-fade {
+      from {
+        opacity: 0;
+        filter: blur(8px);
+        transform: perspective(1000px) rotateX(15deg) translateY(2rem) translateZ(-50px);
+      }
+      to {
+        opacity: 1;
+        filter: none;
+        transform: perspective(1000px) rotateX(0) translateY(0) translateZ(0);
+      }
+    }
+
+    .quote-line {
+      animation: quote-reveal-fade auto cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view();
+      animation-range: entry calc(8% + var(--quote-idx, 0) * 10%) cover calc(28% + var(--quote-idx, 0) * 10%);
+    }
+
+    // #37 — 3D orbital space around sticky ritual altar
+    @keyframes quote-carousel-orbit {
+      from {
+        transform: perspective(1200px) rotateY(-8deg) translateZ(-30px);
+      }
+      50% {
+        transform: perspective(1200px) rotateY(0deg) translateZ(20px);
+      }
+      to {
+        transform: perspective(1200px) rotateY(8deg) translateZ(-30px);
+      }
+    }
+
+    .quotes-carousel {
+      animation: quote-carousel-orbit linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+
+    // #38 — scroll-linked bandoneón bellows accordion compression
+    @keyframes bellows-compression {
+      0% {
+        padding-left: 2.2rem;
+        padding-right: 2.2rem;
+        transform: scaleX(1);
+      }
+      40% {
+        padding-left: 0.6rem;
+        padding-right: 0.6rem;
+        transform: scaleX(0.985);
+      }
+      100% {
+        padding-left: 2.2rem;
+        padding-right: 2.2rem;
+        transform: scaleX(1);
+      }
+    }
+
+    .bellows-stage {
+      animation: bellows-compression linear both;
+      animation-timeline: view();
+      animation-range: entry 0% contain 100%;
+    }
+
+    // #33 — scroll-driven timeline spine burn
     @keyframes timeline-fuse-burn {
       0% {
         transform: scaleY(0);
         opacity: 0;
+        filter: drop-shadow(0 0 4px $accent);
       }
       2% {
         opacity: 1;
       }
+      50% {
+        filter: drop-shadow(0 0 12px $accent) drop-shadow(0 0 18px $accent2);
+      }
       100% {
         transform: scaleY(1);
         opacity: 1;
+        filter: drop-shadow(0 0 16px lighten($accent, 12%)) drop-shadow(0 0 24px #fff);
       }
     }
 
@@ -631,6 +1115,23 @@ footer {
       animation: timeline-fuse-burn linear forwards;
       animation-timeline: --timeline-spine;
       animation-range: entry 15% contain 85%;
+    }
+  }
+
+  // #41 — inverse parallax fog drifting in reverse scroll direction
+  @supports (animation-timeline: scroll()) {
+    @keyframes fog-inverse-drift {
+      from {
+        transform: translate3d(0, -18vh, 0) rotate(0deg) scale(1);
+      }
+      to {
+        transform: translate3d(0, 26vh, 0) rotate(5deg) scale(1.1);
+      }
+    }
+
+    .fog-inverse {
+      animation: fog-inverse-drift linear both;
+      animation-timeline: scroll(root);
     }
   }
 }
@@ -692,37 +1193,42 @@ footer {
   }
 }
 
-// ── cross-document view transitions ──────────────────────────────
+// ── cross-document view transitions — page descent trapdoor (#39) ──
 @view-transition {
   navigation: auto;
 }
 
 ::view-transition-old(root) {
-  animation: 0.3s cubic-bezier(0.4, 0, 1, 1) both vt-out;
+  animation: 0.38s cubic-bezier(0.4, 0, 0.8, 1) both vt-descent-out;
 }
 
 ::view-transition-new(root) {
-  animation: 0.4s cubic-bezier(0, 0, 0.2, 1) both vt-in;
+  animation: 0.48s cubic-bezier(0.05, 0.9, 0.2, 1) both vt-descent-in;
 }
 
-@keyframes vt-out {
-  to {
-    opacity: 0;
-    filter: brightness(0.4) blur(3px);
-    transform: scale(0.985);
-  }
-}
-
-@keyframes vt-in {
-  from {
-    opacity: 0;
-    filter: brightness(1.6) contrast(1.1);
-    transform: scale(1.015);
-  }
-  to {
+@keyframes vt-descent-out {
+  0% {
     opacity: 1;
-    filter: brightness(1) contrast(1);
-    transform: scale(1);
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(10px) brightness(0.2);
+    transform: translateY(32px) scale(0.97);
+  }
+}
+
+@keyframes vt-descent-in {
+  0% {
+    opacity: 0;
+    filter: blur(14px) brightness(1.7);
+    transform: translateY(-28px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) brightness(1);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -765,7 +1271,7 @@ footer {
 }
 
 // #68 — quotation marks hang into the margin
-.quotes li,
+.quote-inner,
 blockquote {
   hanging-punctuation: first last;
 }
@@ -1008,7 +1514,7 @@ body.ba-night {
   initial-value: 0;
 }
 @media (prefers-reduced-motion: no-preference) {
-  h2, .hero .tagline, .quotes li, .dates .c {
+  h2, .hero .tagline, .quote-inner, .dates .c {
     text-shadow:
       calc(var(--scroll-vel) * -3px) 0 rgba($accent, 0.55),
       calc(var(--scroll-vel) *  3px) 0 rgba($accent2, 0.55);
@@ -1096,7 +1602,7 @@ footer p { position: relative; z-index: 1; }
   .hero::after { display: none !important; }
   h1, h2, a, .whisper { color: #000 !important; text-shadow: none !important; }
   a { text-decoration: underline; border: 0; }
-  .block, .dates li, .quotes li { border-color: #000 !important; }
+  .block, .dates li, .quote-inner { border-color: #000 !important; }
   * { box-shadow: none !important; }
 }
 
@@ -1104,7 +1610,7 @@ footer p { position: relative; z-index: 1; }
 
 // #32 — scroll-velocity directional tilt on ceremony, quote, and timeline cards
 @media (prefers-reduced-motion: no-preference) {
-  .dates li, .quotes li, .timeline li {
+  .dates li, .quote-inner, .timeline li {
     transform: skewY(calc(var(--scroll-dir-vel, 0) * 2.2deg));
     transition: transform 0.15s ease-out;
   }
