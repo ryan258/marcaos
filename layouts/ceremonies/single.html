@@ -7,6 +7,9 @@
   <h2>{{ .Title }}</h2>
   {{ .Content }}
   {{ with .Params.tickets }}<p><a href="{{ . }}" rel="noopener">{{ i18n "tickets" }}</a></p>{{ end }}
-  <p><a href="{{ with .Parent }}{{ .RelPermalink }}{{ else }}{{ site.Home.RelPermalink }}{{ end }}">{{ i18n "all_ceremonies" }}</a></p>
+  <p>
+    <a href="{{ with .Parent }}{{ .RelPermalink }}{{ else }}{{ site.Home.RelPermalink }}{{ end }}">{{ i18n "all_ceremonies" }}</a>
+    <button class="share-ceremony" type="button" hidden>{{ i18n "transmit" }}</button>
+  </p>
 </article>
 {{ end }}

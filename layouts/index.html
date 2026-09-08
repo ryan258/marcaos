@@ -60,6 +60,14 @@
 {{ with where site.RegularPages "Section" "ceremonies" }}
 <section class="block shows-block">
   <h2>{{ site.Params.shows.heading | default "shows" }}</h2>
+  {{ with (where . "Date" "gt" now).ByDate }}
+  {{ $next := index . 0 }}
+  <p class="countdown" data-until="{{ $next.Date.Format "2006-01-02T15:04:05Z07:00" }}"
+     data-days="{{ i18n "cd_days" }}" data-hours="{{ i18n "cd_hours" }}" data-beats="{{ i18n "cd_beats" }}">
+    <span class="cd-label">{{ i18n "cd_next" }} · <a href="{{ $next.RelPermalink }}">{{ $next.Title }}</a></span>
+    <span class="cd-val"></span>
+  </p>
+  {{ end }}
   {{ partial "ceremony-list.html" $ }}
 </section>
 {{ end }}

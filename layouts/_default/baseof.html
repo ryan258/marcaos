@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="{{ .Language.Lang }}">
 {{ partial "head.html" . }}
-<body>
+<body{{ if and (eq .Kind "page") (eq .Section "ceremonies") }} data-ceremony="{{ .File.ContentBaseName }}"{{ end }}>
   <div class="void-overlay" aria-hidden="true"></div>
   <div class="blackout-vignette" aria-hidden="true"></div>
+  <div class="alley-grid" aria-hidden="true"></div>
   <div class="scroll-needle" aria-hidden="true"></div>
   {{ if gt (len .AllTranslations) 1 }}
   <nav class="langs" aria-label="language">
@@ -12,6 +13,7 @@
     {{ end }}
   </nav>
   {{ end }}
+  <p class="ba-clock" data-night="{{ i18n "ba_night" }}" data-day="{{ i18n "ba_day" }}" hidden></p>
   <main>
     {{ block "main" . }}{{ end }}
   </main>

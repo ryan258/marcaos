@@ -235,10 +235,29 @@
     }
   }
 
+  // ── Screen Wake Lock during the sound experience (#79) ──────────
+  let wakeLock = null;
+
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch (_) {
+      // denied (low battery, permissions) — no-op
+    }
+  }
+  // Re-acquire after the tab comes back to the foreground
+  document.addEventListener('visibilitychange', async () => {
+    if (wakeLock !== null && document.visibilityState === 'visible') {
+      requestWakeLock();
+    }
+  });
+
   function igniteCeremony() {
     const ctx = getAudioContext();
     triggerVisualStrike();
     triggerHapticStrike();
+    requestWakeLock();
     playMatchStrike();
     document.body.classList.add('ceremony-active');
 
@@ -360,6 +379,102 @@
     }
   }
 
+  // ── Buenos Aires Blackout Clock (#51) ──────────────────────────
+  // Native Intl in the BA timezone (UTC-3, no DST) — is it night there?
+  function bindBuenosAiresClock() {
+    const el = document.querySelector('.ba-clock');
+    if (!el) return;
+
+    const update = () => {
+      const hour = Number(new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        hour: 'numeric',
+        hour12: false,
+      }).format(new Date()));
+      const night = hour >= 20 || hour < 7;
+      document.body.classList.toggle('ba-night', night);
+      el.textContent = (night ? '● ' : '○ ') + 'buenos aires · ' +
+        (night ? el.dataset.night : el.dataset.day);
+      el.hidden = false;
+    };
+
+    update();
+    setInterval(update, 60000);
+  }
+
+  // ── The Blackout Countdown (#46) — days · hours · 126 BPM beats ──
+  function bindCountdown() {
+    const el = document.querySelector('.countdown');
+    if (!el) return;
+
+    const target = new Date(el.dataset.until).getTime();
+    const val = el.querySelector('.cd-val');
+    if (Number.isNaN(target) || !val) return;
+
+    const tick = () => {
+      const ms = target - Date.now();
+      if (ms <= 0) {
+        val.textContent = '— ' + el.dataset.beats + ' —';
+        return;
+      }
+      const days = Math.floor(ms / 86400000);
+      const hours = Math.floor((ms % 86400000) / 3600000);
+      // remaining sub-hour time expressed as beats at 126 BPM (2.1/s)
+      const beats = Math.floor(((ms % 3600000) / 1000) * 2.1);
+      val.textContent =
+        days + ' ' + el.dataset.days + ' · ' +
+        hours + ' ' + el.dataset.hours + ' · ' +
+        beats + ' ' + el.dataset.beats;
+    };
+
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  // ── Local Storage Ceremony Progress (#92) ──────────────────────
+  // Record visited ceremonies; glow the ones still unseen on the list.
+  function bindCeremonyProgress() {
+    const KEY = 'marcaos:visited';
+    let visited;
+    try {
+      visited = new Set(JSON.parse(localStorage.getItem(KEY) || '[]'));
+    } catch (_) {
+      visited = new Set();
+    }
+
+    const slug = document.body.dataset.ceremony;
+    if (slug) {
+      visited.add(slug);
+      try {
+        localStorage.setItem(KEY, JSON.stringify([...visited]));
+      } catch (_) { /* private mode / quota — non-fatal */ }
+    }
+
+    document.querySelectorAll('.dates .c a').forEach((a) => {
+      const s = a.getAttribute('href').replace(/\/+$/, '').split('/').pop();
+      if (!visited.has(s)) a.closest('li').classList.add('unvisited');
+    });
+  }
+
+  // ── Web Share API with Ceremony Card (#78) ─────────────────────
+  function bindShare() {
+    const btn = document.querySelector('.share-ceremony');
+    if (!btn || !navigator.share) return;
+
+    btn.hidden = false;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.share({
+          title: document.title,
+          text: document.querySelector('meta[name="description"]')?.content || document.title,
+          url: location.href,
+        });
+      } catch (_) {
+        // user dismissed the share sheet — no-op
+      }
+    });
+  }
+
   // Bind igniter triggers & ritual listeners
   document.addEventListener('DOMContentLoaded', () => {
     const strikeTriggers = document.querySelectorAll('[data-action="strike-match"]');
@@ -372,6 +487,10 @@
     bindHeroParallax();
     bindCipherDecryption();
     bindKeystrokeRitual();
+    bindBuenosAiresClock();
+    bindCountdown();
+    bindCeremonyProgress();
+    bindShare();
   });
 })();
 
