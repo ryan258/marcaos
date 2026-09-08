@@ -1,0 +1,19 @@
+{
+  "name": "Marcaos — The Drop Was Foretold",
+  "short_name": "Marcaos",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0a09",
+  "theme_color": "#0d0a09",
+  "description": "Dark progressive house, ancestral rhythm rituals, and ceremony transmissions from Buenos Aires.",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

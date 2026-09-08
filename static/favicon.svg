@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#0d0a09"/>
+  <!-- Alchemical copper halo -->
+  <circle cx="16" cy="16" r="13" fill="none" stroke="#d08050" stroke-width="1" stroke-dasharray="3 2" opacity="0.6"/>
+  <!-- Match head / flame morph contour -->
+  <path d="M16 4 C13 11 9 14 9 20 C9 25 12 28 16 28 C20 28 23 25 23 20 C23 14 19 11 16 4 Z" fill="#d0011b"/>
+  <!-- White-hot sulfur inner core -->
+  <path d="M16 12 C14.5 16 12 18 12 21 C12 23.5 13.8 25.5 16 25.5 C18.2 25.5 20 23.5 20 21 C20 18 17.5 16 16 12 Z" fill="#fef6e0"/>
+  <!-- Alchemical sulfur cross mark -->
+  <line x1="16" y1="28" x2="16" y2="31" stroke="#d08050" stroke-width="1.5"/>
+  <line x1="13" y1="30" x2="19" y2="30" stroke="#d08050" stroke-width="1.5"/>
+</svg>
