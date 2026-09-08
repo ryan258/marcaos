@@ -16,11 +16,12 @@ Ranked by payoff for this site.
 
 | Feature | What it buys us | Notes |
 |---|---|---|
-| **Bandoneón Texture Filter (#3)** | Periodic harmonic notch/comb filter shaping noise bursts to emulate a distant tango accordion | Web Audio BiquadFilter / Convolver |
-| **The Match Strike Gate (#47)** | Ritual gate requiring striking the match before ceremony ticket links reveal themselves | Session gating + glowing ember reveal |
-| **Fortune Teller Tarot Draw (#52)** | Digital card draw revealing one of 7 Marchaos prophecies with ambient sound motif | Buenos Aires fortune teller lore |
+| **Speculation Rules API Pre-rendering (#86)** | Instantaneous ceremony page loads via background prerender on date hover | `<script type="speculationrules">` |
+| **Zero-Byte Image Placeholders (#87)** | SVG inline blur silhouette inlining the artist portrait before full resolution loads | Zero network payload LCP protection |
+| **Fetch Priority Hero Image Boost (#91)** | `fetchpriority="high"` on hero portrait ensuring LCP under 400ms globally | HTML platform native |
+| **Client Timezone Ceremony Highlighting (#93)** | Client-side timezone detection highlighting the tour date closest to user | `Intl.DateTimeFormat` detection |
 
-*(#1, #85, #94 shipped — see `CHANGELOG.md`)*
+*(#1, #2, #3, #7, #43, #47, #48, #52, #55, #73, #74, #85, #94 shipped — see `CHANGELOG.md`)*
 
 
 
@@ -41,12 +42,12 @@ A catalog of 101 platform-native ideas for progressive house, live ceremony ritu
 
 ### I. Sonic Architecture & Procedural Synthesis (1–15)
 1. **Procedural Tape Hiss & Wow/Flutter**: _Shipped — see `CHANGELOG.md`._
-2. **Sub-Bass Drone Anchor**: Continuous 38Hz binaural sine wave pulsing at 126 BPM on user interaction, ducking automatically on deep page scroll.
-3. **Bandoneón Texture Filter**: Periodic harmonic notch filter shaping noise bursts to emulate the bellows of a distant tango accordion.
+2. **Sub-Bass Drone Anchor**: _Shipped — see `CHANGELOG.md`._
+3. **Bandoneón Texture Filter**: _Shipped — see `CHANGELOG.md`._
 4. **Distance Attenuation on Scroll**: Spatial Web Audio `PannerNode` moving sound from intimate headphone proximity to a deep rooftop hall as user scrolls downward.
 5. **Interactive Match-Strike Friction Modeler**: Pointer drag velocity modulates noise filter cutoff—faster drag strikes a hotter match flare.
 6. **Reverse Whisper Granular Synthesizer**: Micro-sliced backwards Spanish vocal syllables randomly triggered on ceremony link hovers.
-7. **Kick Drop Shockwave Trigger**: A low-end impulse generator synchronizing synthesized sub-bass with a momentary CSS scale ripple.
+7. **Kick Drop Shockwave Trigger**: _Shipped — see `CHANGELOG.md`._
 8. **Ghost Radio Frequency Dial**: Draggable frequency scrubber (88–108 MHz) revealing hidden tour lore through analog static bursts.
 9. **BPM-Clocked Audio Visualizer Ring**: Radial SVG stroke dasharray animated via `AnalyserNode.getByteFrequencyData()` around the ceremony trigger.
 10. **Sonic Matchbox Striker UI**: Haptic-assisted scratch pad using pointer drag events to synthesize the match ignite gesture.
@@ -74,21 +75,21 @@ numbered ranges below still line up with the original catalog.
 40. **Gypsy Frequency Waveform Rail**: Left margin waveform path that deforms and spikes as the user scrolls past sound quotes.
 41. **Inverse Parallax Fog**: Foreground smoke drifting in reverse scroll direction to maximize perceived stage depth.
 42. **Anchor-Positioned Whispers**: Footnotes and poetic fragments anchored to hover targets using native CSS `anchor()`.
-43. **Camera Shake Impulse**: CSS keyframe screen-shake triggered at the instant of the match drop.
+43. **Camera Shake Impulse**: _Shipped — see `CHANGELOG.md`._
 44. **Scroll-State Sticky Booking Bar**: Mini booking bar that docks to screen edge using `container-type: scroll-state` without scroll event listeners.
 45. **Text-Wrap Balance & Pretty**: Balanced headline typography preventing orphaned words across mobile breakpoints.
 
 ### IV. Ceremony, Ritual & Mystery Mechanics (46–60)
 46. **The Blackout Countdown**: Dynamic ceremony countdown timer counting down in days, hours, and beats (126 BPM clock).
-47. **The Match Strike Gate**: Optional ritual gate requiring striking the match before the ceremony ticket links reveal themselves.
-48. **Coordinates Decryption**: Tour venue addresses rendered in cipher text that decrypts letter-by-letter on hover.
+47. **The Match Strike Gate**: _Shipped — see `CHANGELOG.md`._
+48. **Coordinates Decryption**: _Shipped — see `CHANGELOG.md`._
 49. **Ghost Guestbook**: Ephemeral guestbook where fan messages fade into smoke over 30 seconds via localStorage decay.
 50. **The Split Soul Toggle**: _Shipped — see `CHANGELOG.md`._
 51. **Buenos Aires Blackout Clock**: Live status indicator displaying whether Buenos Aires is currently in night or day, altering site ambiance.
-52. **Fortune Teller Tarot Draw**: Digital card draw revealing one of 7 Marchaos prophecies with sound motif.
+52. **Fortune Teller Tarot Draw**: _Shipped — see `CHANGELOG.md`._
 53. **Cryptic Tour RSVP**: Ticket RSVP button that outputs a cryptographic ceremony pass stored in Apple Wallet / web pass.
 54. **The Lost Signal 404 Radio**: _Shipped — see `CHANGELOG.md`._
-55. **Secret Keystroke Ritual**: Typing `D-R-O-P` initiates a blackout and plays a match strike sequence.
+55. **Secret Keystroke Ritual**: _Shipped — see `CHANGELOG.md`._
 56. **The Solstice Transmission Mode**: Automatic site theme shift during solar solstices and equinoxes.
 57. **Whisper Archive Modal**: Popover containing fragmented quotes recorded from the Parque Centenario fog.
 58. **Alchemical Transmutation Slider**: User drags a slider transforming raw sound stems from dry bandoneón to pitch-bent dark house.
@@ -110,8 +111,8 @@ numbered ranges below still line up with the original catalog.
 72. **Bilingual Glyph Sync**: Seamless font switching between Argentine Spanish diacritics and English glyphs.
 
 ### VI. Hardware, Sensors & Environmental Context (73–84)
-73. **Device Motion / Gyroscope Parallax**: Device orientation API driving `--px` / `--py` tilt on mobile phones when tilted in hand.
-74. **Vibration API Haptic Match Strike**: `navigator.vibrate([30, 50, 100])` delivering tactile match friction directly to mobile hands.
+73. **Device Motion / Gyroscope Parallax**: _Shipped — see `CHANGELOG.md`._
+74. **Vibration API Haptic Match Strike**: _Shipped — see `CHANGELOG.md`._
 75. **Ambient Light Sensor Darkening**: Uses Ambient Light Sensor API to darken site contrast when the room lights are dimmed.
 76. **Battery Status Power Conservation**: _Shipped — see `CHANGELOG.md`._
 77. **Network Information Audio Scaler**: Falls back to simple sine sweep if `navigator.connection.saveData` is detected.

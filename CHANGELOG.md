@@ -7,6 +7,22 @@ this project is a rolling static site and is not versioned.
 
 ### Added
 
+- **10 platform-native features** (`docs/101-cutting-edge-aoi-features.md`
+  §2, §3, §7, §43, §47, §48, §52, §55, §73, §74):
+  - Bandoneón texture filter — periodic harmonic notch/comb filter shaping
+    noise bursts to emulate the breathing bellows of a distant tango accordion (#3)
+  - The Match Strike Gate — ritual session veil locking ticket links until the
+    match is ignited (#47)
+  - Fortune Teller Tarot Draw — 3D interactive card flip revealing one of 7
+    Marchaos San Telmo prophecies with procedural crystal chime motif (#52)
+  - Sub-bass drone anchor — continuous 38Hz binaural sine wave pulsing at 126 BPM (#2)
+  - Kick drop shockwave trigger — low-end impulse generator synchronizing synthesized
+    sub-bass with scale ripple (#7)
+  - Camera shake impulse — CSS keyframe screen shake triggered at instant of match drop (#43)
+  - Alchemical coordinate cipher decryption on hover over tour venues (#48)
+  - Secret keystroke ritual — typing D-R-O-P initiates blackout match ignition (#55)
+  - Device motion & gyroscope parallax — device orientation API driving `--px`/`--py` on mobile (#73)
+  - Vibration API haptic match strike — tactile friction feedback on mobile ignition (#74)
 - **14 platform-native features** (`docs/101-cutting-edge-aoi-features.md`
   §1, §32, §34, §35, §50, §54, §61, §62, §64, §67, §69, §70, §76, §85):
   - Procedural tape hiss & wow/flutter — pink noise buffer with LFO pitch
