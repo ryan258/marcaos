@@ -19,14 +19,17 @@
 
 {{ with .Site.Params.about }}
 <section class="block about">
+  <span class="alch-badge" aria-hidden="true">🜂</span>
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   {{ with .body }}<p>{{ . | markdownify }}</p>{{ end }}
   {{ with .whisper }}<p class="whisper">{{ . }}</p>{{ end }}
+  <p class="whisper marcos-memory-note" hidden><span class="alch-marker">☿</span> <span class="redacted" tabindex="0">marcos disappeared for 3 days in parque centenario, returned changed</span></p>
 </section>
 {{ end }}
 
 {{ with .Site.Params.quotes }}
 <section class="block quotes-block">
+  <span class="alch-badge" aria-hidden="true">🜃</span>
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   {{ with .lines }}
   <ul class="quotes">
@@ -48,6 +51,7 @@
 
 {{ with .Site.Params.timeline }}{{ if .entries }}
 <section class="block timeline-block">
+  <span class="alch-badge" aria-hidden="true">☉</span>
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   <ol class="timeline">
     {{ range .entries }}
@@ -59,6 +63,7 @@
 
 {{ with where site.RegularPages "Section" "ceremonies" }}
 <section class="block shows-block">
+  <span class="alch-badge" aria-hidden="true">🜄</span>
   <h2>{{ site.Params.shows.heading | default "shows" }}</h2>
   {{ with (where . "Date" "gt" now).ByDate }}
   {{ $next := index . 0 }}
@@ -74,6 +79,7 @@
 
 {{ with .Site.Params.press }}
 <section class="block press-block" id="press">
+  <span class="alch-badge" aria-hidden="true">🜏</span>
   {{ with .heading }}<h2>{{ . }}</h2>{{ end }}
   {{ with .body }}<p>{{ . | markdownify }}</p>{{ end }}
   {{ with .email }}<p><a href="mailto:{{ . }}">{{ . }}</a></p>{{ end }}

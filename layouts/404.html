@@ -1,6 +1,17 @@
 {{ define "main" }}
-<section class="block" style="min-height:60vh">
+<section class="block lost-signal-block" style="min-height:70vh">
   <h2>{{ i18n "lost_signal" }}</h2>
+  <p class="whisper">frequency lost in the void. tune between 88.0 and 126.0 mhz.</p>
+  <div class="radio-tuner" id="radio-tuner">
+    <div class="radio-display">
+      <span class="radio-freq-val" id="radio-freq-val">101.4</span> <span class="radio-mhz">MHz</span>
+      <span class="radio-status" id="radio-status">STATIC</span>
+    </div>
+    <input type="range" class="radio-dial" id="radio-dial" min="88.0" max="126.0" step="0.1" value="101.4" aria-label="Frequency Tuner">
+    <div class="radio-scale" aria-hidden="true">
+      <span>88</span><span>96</span><span>104</span><span>112</span><span>120</span><span class="ritual-marker">126.0 🜂</span>
+    </div>
+  </div>
   <p><a href="{{ site.Home.RelPermalink }}">{{ i18n "return_to_drop" }}</a></p>
 </section>
 {{ end }}

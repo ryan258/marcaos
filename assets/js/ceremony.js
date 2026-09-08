@@ -199,6 +199,9 @@
     oscR.start(now);
     lfo.start(now);
 
+    // #1 — Procedural Tape Hiss & Wow/Flutter (Parque Centenario cassette emulation)
+    startProceduralTapeHiss(ctx, masterGain);
+
     droneNodes = { oscL, oscR, lfo, masterGain };
 
     // Auto-ducking based on page scroll depth
@@ -220,6 +223,79 @@
       const targetGain = document.hidden ? 0.0001 : 0.12;
       droneNodes.masterGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.3);
     });
+  }
+
+  // ── Procedural Tape Hiss & Wow/Flutter (#1) ──────────────────────
+  // Modulated pitch-shifted pink noise emulating an old cassette found in Parque Centenario
+  let tapeHissNodes = null;
+
+  function createPinkNoiseBuffer(ctx, durationSeconds) {
+    const sampleRate = ctx.sampleRate;
+    const bufferSize = Math.floor(sampleRate * durationSeconds);
+    const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+    const data = buffer.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.06;
+      b6 = white * 0.115926;
+    }
+    return buffer;
+  }
+
+  function startProceduralTapeHiss(ctx, targetNode) {
+    if (tapeHissNodes || !ctx) return;
+    const now = ctx.currentTime;
+    const buffer = createPinkNoiseBuffer(ctx, 3.5);
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+
+    // Filter shaping to emulate cassette playback head resonance
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(2100, now);
+    filter.Q.setValueAtTime(1.4, now);
+
+    // Wow LFO (~0.55 Hz modulating playback rate / pitch drift)
+    const wowLFO = ctx.createOscillator();
+    const wowGain = ctx.createGain();
+    wowLFO.type = 'sine';
+    wowLFO.frequency.setValueAtTime(0.55, now);
+    wowGain.gain.setValueAtTime(0.007, now);
+    wowLFO.connect(wowGain);
+    wowGain.connect(source.playbackRate);
+
+    // Flutter LFO (~4.6 Hz micro amplitude tremor)
+    const flutterLFO = ctx.createOscillator();
+    const flutterGain = ctx.createGain();
+    flutterLFO.type = 'triangle';
+    flutterLFO.frequency.setValueAtTime(4.6, now);
+    flutterGain.gain.setValueAtTime(0.005, now);
+
+    const hissGain = ctx.createGain();
+    hissGain.gain.setValueAtTime(0.0001, now);
+    hissGain.gain.exponentialRampToValueAtTime(0.038, now + 2.0);
+
+    flutterLFO.connect(flutterGain);
+    flutterGain.connect(hissGain.gain);
+
+    source.connect(filter);
+    filter.connect(hissGain);
+    hissGain.connect(targetNode || ctx.destination);
+
+    source.start(now);
+    wowLFO.start(now);
+    flutterLFO.start(now);
+
+    tapeHissNodes = { source, wowLFO, flutterLFO, hissGain };
   }
 
   // Haptic feedback during match strike sequence
@@ -575,23 +651,29 @@
     }).observe(cv);
   }
 
-  // ── Scroll velocity → --scroll-vel (#22 phosphor ghost, #27 aberration) ──
+  // ── Scroll velocity → --scroll-vel (#22 phosphor ghost, #27 aberration) & --scroll-dir-vel (#32 skew) ──
   function bindScrollVelocity() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const root = document.documentElement;
     let last = window.scrollY;
     let vel = 0;
+    let dirVel = 0;
     let raf = 0;
 
     const decay = () => {
       vel *= 0.85;
+      dirVel *= 0.85;
       root.style.setProperty('--scroll-vel', vel.toFixed(3));
-      raf = vel > 0.01 ? requestAnimationFrame(decay) : 0;
+      root.style.setProperty('--scroll-dir-vel', dirVel.toFixed(3));
+      raf = (vel > 0.01 || Math.abs(dirVel) > 0.01) ? requestAnimationFrame(decay) : 0;
     };
 
     window.addEventListener('scroll', () => {
-      vel = Math.min(1, vel + Math.abs(window.scrollY - last) / 120);
-      last = window.scrollY;
+      const current = window.scrollY;
+      const delta = current - last;
+      vel = Math.min(1, vel + Math.abs(delta) / 120);
+      dirVel = Math.max(-1, Math.min(1, dirVel + delta / 80));
+      last = current;
       if (!raf) raf = requestAnimationFrame(decay);
     }, { passive: true });
   }
@@ -610,6 +692,158 @@
         document.body.classList.add('bleed-live');
       });
     }, { passive: true });
+  }
+
+  // ── Floating 3D Date Cards (#35) ─────────────────────────────────
+  function bindFloatingCards() {
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    const cards = document.querySelectorAll('.dates li, .timeline li');
+    cards.forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        card.style.setProperty('--card-rx', (-y * 12).toFixed(2));
+        card.style.setProperty('--card-ry', (x * 12).toFixed(2));
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--card-rx', '0');
+        card.style.setProperty('--card-ry', '0');
+      });
+    });
+  }
+
+  // ── The Split Soul Toggle (#50) ──────────────────────────────────
+  function bindSplitSoul() {
+    const toggle = document.getElementById('soul-toggle');
+    if (!toggle) return;
+    const label = toggle.querySelector('.soul-label');
+    const isMarcosSaved = localStorage.getItem('marchaos_soul') === 'marcos';
+
+    function setSoul(isMarcos) {
+      if (isMarcos) {
+        document.body.classList.add('marcos-soul');
+        toggle.setAttribute('aria-pressed', 'true');
+        if (label) label.textContent = 'marcos';
+      } else {
+        document.body.classList.remove('marcos-soul');
+        toggle.setAttribute('aria-pressed', 'false');
+        if (label) label.textContent = 'marchaos';
+      }
+    }
+
+    if (isMarcosSaved) setSoul(true);
+
+    toggle.addEventListener('click', () => {
+      const isMarcos = !document.body.classList.contains('marcos-soul');
+      setSoul(isMarcos);
+      localStorage.setItem('marchaos_soul', isMarcos ? 'marcos' : 'marchaos');
+    });
+  }
+
+  // ── Battery Status Power Conservation (#76) ─────────────────────
+  function bindBatteryConservation() {
+    if (typeof navigator !== 'undefined' && 'getBattery' in navigator) {
+      navigator.getBattery().then((battery) => {
+        const updateBattery = () => {
+          if (battery.level < 0.2 && !battery.charging) {
+            document.documentElement.classList.add('low-battery');
+          } else {
+            document.documentElement.classList.remove('low-battery');
+          }
+        };
+        updateBattery();
+        battery.addEventListener('levelchange', updateBattery);
+        battery.addEventListener('chargingchange', updateBattery);
+      }).catch(() => {});
+    }
+  }
+
+  // ── Offline Ceremony PWA Service Worker (#85) ───────────────────
+  function registerServiceWorker() {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  }
+
+  // ── The Lost Signal 404 Radio (#54) ──────────────────────────────
+  function bindRadioTuner() {
+    const dial = document.getElementById('radio-dial');
+    const freqVal = document.getElementById('radio-freq-val');
+    const statusVal = document.getElementById('radio-status');
+    if (!dial || !freqVal || !statusVal) return;
+
+    let radioNoiseSource = null;
+    let radioNoiseGain = null;
+    let demoOsc = null;
+    let demoGain = null;
+
+    function initRadioAudio() {
+      const ctx = getAudioContext();
+      if (!ctx || radioNoiseSource) return;
+
+      const buffer = createPinkNoiseBuffer(ctx, 2.0);
+      radioNoiseSource = ctx.createBufferSource();
+      radioNoiseSource.buffer = buffer;
+      radioNoiseSource.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(1400, ctx.currentTime);
+
+      radioNoiseGain = ctx.createGain();
+      radioNoiseGain.gain.setValueAtTime(0.06, ctx.currentTime);
+
+      radioNoiseSource.connect(filter);
+      filter.connect(radioNoiseGain);
+      radioNoiseGain.connect(ctx.destination);
+      radioNoiseSource.start();
+
+      // Demo synth for 126.0 ritual band
+      demoOsc = ctx.createOscillator();
+      demoGain = ctx.createGain();
+      demoOsc.type = 'sawtooth';
+      demoOsc.frequency.setValueAtTime(63.0, ctx.currentTime);
+      demoGain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      demoOsc.connect(demoGain);
+      demoGain.connect(ctx.destination);
+      demoOsc.start();
+    }
+
+    dial.addEventListener('input', (e) => {
+      initRadioAudio();
+      const val = parseFloat(e.target.value);
+      freqVal.textContent = val.toFixed(1);
+
+      const isLocked = Math.abs(val - 126.0) <= 0.4;
+      if (isLocked) {
+        statusVal.textContent = 'LOCKED · TRANSMISSION';
+        statusVal.classList.add('locked');
+        if (radioNoiseGain && audioCtx) {
+          radioNoiseGain.gain.setTargetAtTime(0.006, audioCtx.currentTime, 0.05);
+        }
+        if (demoGain && audioCtx) {
+          demoGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.05);
+        }
+      } else {
+        statusVal.textContent = 'STATIC';
+        statusVal.classList.remove('locked');
+        if (radioNoiseGain && audioCtx) {
+          radioNoiseGain.gain.setTargetAtTime(0.06, audioCtx.currentTime, 0.05);
+        }
+        if (demoGain && audioCtx) {
+          demoGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
+        }
+      }
+    });
+
+    dial.addEventListener('change', () => {
+      if (radioNoiseGain && audioCtx && statusVal.textContent === 'STATIC') {
+        radioNoiseGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.6);
+      }
+    });
   }
 
   // Bind igniter triggers & ritual listeners
@@ -631,6 +865,11 @@
     bindSmoke();
     bindScrollVelocity();
     bindLightBleed();
+    bindFloatingCards();
+    bindSplitSoul();
+    bindBatteryConservation();
+    bindRadioTuner();
+    registerServiceWorker();
   });
 })();
 

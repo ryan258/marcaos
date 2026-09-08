@@ -1099,3 +1099,275 @@ footer p { position: relative; z-index: 1; }
   .block, .dates li, .quotes li { border-color: #000 !important; }
   * { box-shadow: none !important; }
 }
+
+// ── Batch 1 & 2 Extensions (#32, #34, #35, #50, #54, #61, #62, #64, #67, #69, #70, #76) ──
+
+// #32 — scroll-velocity directional tilt on ceremony, quote, and timeline cards
+@media (prefers-reduced-motion: no-preference) {
+  .dates li, .quotes li, .timeline li {
+    transform: skewY(calc(var(--scroll-dir-vel, 0) * 2.2deg));
+    transition: transform 0.15s ease-out;
+  }
+}
+
+// #34 — receding void hero in negative Z space
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-inner {
+      animation: hero-recede linear both;
+      animation-timeline: scroll();
+      animation-range: entry 0% exit 80%;
+    }
+    @keyframes hero-recede {
+      to {
+        transform: scale(0.88) translateZ(-150px);
+        opacity: 0.4;
+        filter: blur(2px);
+      }
+    }
+  }
+}
+
+// #35 — floating 3D date and timeline cards with pointer-tilt
+.dates li, .timeline li {
+  perspective: 800px;
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dates li:hover, .timeline li:hover {
+  transform: rotateX(calc(var(--card-rx, 0) * 1deg)) rotateY(calc(var(--card-ry, 0) * 1deg)) translateZ(6px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba($accent2, 0.15);
+}
+
+// #50 — the split soul toggle (marchaos transmission vs marcos acoustic memory)
+.top-bar {
+  position: fixed;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  .langs {
+    position: static;
+    top: auto;
+    right: auto;
+  }
+}
+.soul-toggle {
+  background: transparent;
+  border: 1px solid rgba($rule, 0.35);
+  color: $muted;
+  font-family: $mono;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  &:hover {
+    border-color: $rule;
+    color: $text;
+    box-shadow: 0 0 10px rgba($rule, 0.25);
+  }
+}
+body.marcos-soul {
+  --accent: #b87333;
+  --bg: #110d0b;
+  --text: #d8c6b2;
+  --muted: #8e7d6d;
+  background-color: #110d0b;
+
+  .soul-toggle {
+    border-color: $rule;
+    color: lighten($rule, 15%);
+    background: rgba($rule, 0.18);
+    box-shadow: 0 0 10px rgba($rule, 0.3);
+  }
+  // True acoustic copper recolor across all elements that bake compile-time $accent
+  a {
+    color: $rule !important;
+    border-bottom-color: rgba($rule, 0.45) !important;
+    &:hover { color: lighten($rule, 15%) !important; }
+  }
+  .ceremony-trigger {
+    border-color: rgba($rule, 0.85) !important;
+    box-shadow: 0 0 30px rgba($rule, 0.5), 0 0 50px rgba($rule, 0.25) !important;
+    .match-morph { color: $rule !important; }
+  }
+  .alch-badge { color: $rule !important; }
+  .cd-val, .countdown { color: $rule !important; }
+  .dates li .d { color: $rule !important; }
+  .dates li:hover {
+    border-left-color: $rule !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba($rule, 0.3) !important;
+  }
+  .timeline li span { border-color: $rule !important; color: $rule !important; }
+  .radio-freq-val { color: $rule !important; text-shadow: 0 0 10px rgba($rule, 0.6) !important; }
+  .radio-dial { accent-color: $rule !important; }
+  .scroll-needle { background: $rule !important; box-shadow: 0 0 8px rgba($rule, 0.8) !important; }
+  .hero-sigil { border-color: rgba($rule, 0.3) !important; }
+  .hero::after { filter: sepia(0.7) contrast(1.15); }
+  .marcos-memory-note {
+    display: block !important;
+  }
+}
+
+// #61 — alchemical unicode glyph system as semantic section badges
+.alch-badge {
+  display: inline-block;
+  font-size: 1.1rem;
+  color: $rule;
+  opacity: 0.55;
+  margin-bottom: 0.5rem;
+  user-select: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.block:hover .alch-badge {
+  opacity: 0.95;
+  transform: scale(1.15);
+  color: $accent;
+  text-shadow: 0 0 8px rgba($accent, 0.5);
+}
+
+// #62 — variable font weight breath at 126 BPM (gated for reduced motion)
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes weight-breath {
+    0%, 100% { font-weight: 300; }
+    50%      { font-weight: 450; }
+  }
+  .hero .tagline {
+    animation: weight-breath $tempo-bar infinite ease-in-out;
+  }
+}
+
+// #64 — interrupted strikethroughs with copper hairline & burning red endpoints
+.strike, del {
+  position: relative;
+  text-decoration: none;
+  &::after {
+    content: "";
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, $accent 0%, $rule 15%, $rule 85%, $accent 100%);
+    box-shadow: 0 0 4px rgba($accent, 0.8);
+    pointer-events: none;
+  }
+}
+
+// #67 — redacted text reveals (black marker dissipates on hover/tap)
+.redacted {
+  display: inline-block;
+  background: #000;
+  color: transparent;
+  border-radius: 2px;
+  padding: 0 0.25rem;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.9);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.4s ease, background 0.4s ease, filter 0.4s ease;
+  border: 1px solid rgba($rule, 0.15);
+  &:hover, &:focus {
+    background: rgba(13, 10, 9, 0.6);
+    color: $text;
+    border-color: rgba($rule, 0.4);
+    text-shadow: 0 0 6px rgba($rule, 0.4);
+  }
+}
+
+// #69 — spectral violet text glows using oklch
+@supports (color: oklch(0.65 0.28 300)) {
+  h2:hover, .dates li:hover a {
+    text-shadow: 0 0 14px oklch(0.65 0.28 300 / 0.55), 0 0 24px oklch(0.55 0.25 300 / 0.25);
+  }
+}
+
+// #70 — monospace transmission callouts with blinking prompt (gated for reduced motion)
+.mono-callout {
+  font-family: $mono;
+  font-size: 0.8rem;
+  letter-spacing: -0.02em;
+  color: $muted;
+  border-left: 2px solid $rule;
+  padding-left: 0.75rem;
+  margin: 1rem 0;
+  &::after {
+    content: "_";
+    color: $accent;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mono-callout::after {
+    animation: blink 1s infinite steps(1);
+  }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+}
+
+// #76 — low battery conservation mode
+html.low-battery {
+  .void-overlay, .fog, .light-bleed { display: none !important; }
+  footer canvas.smoke { display: none !important; }
+  * { backdrop-filter: none !important; }
+}
+
+// #54 — the lost signal 404 radio
+.lost-signal-block {
+  text-align: center;
+  .radio-tuner {
+    max-width: 24rem;
+    margin: 2.5rem auto;
+    padding: 1.5rem;
+    border: 1px solid rgba($rule, 0.35);
+    background: rgba(13, 10, 9, 0.75);
+    backdrop-filter: blur(8px);
+    border-radius: 4px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  }
+  .radio-display {
+    font-family: $mono;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba($rule, 0.2);
+    margin-bottom: 1rem;
+  }
+  .radio-freq-val {
+    font-size: 2rem;
+    color: $accent;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px rgba($accent, 0.6);
+  }
+  .radio-mhz { font-size: 0.85rem; color: $muted; margin-left: 0.25rem; }
+  .radio-status {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: $muted;
+  }
+  .radio-status.locked {
+    color: $accent2;
+    text-shadow: 0 0 8px rgba($accent2, 0.8);
+  }
+  .radio-dial {
+    width: 100%;
+    accent-color: $accent;
+    cursor: ew-resize;
+    margin: 1rem 0;
+  }
+  .radio-scale {
+    display: flex;
+    justify-content: space-between;
+    font-family: $mono;
+    font-size: 0.65rem;
+    color: $muted;
+    .ritual-marker { color: $rule; }
+  }
+}
+
