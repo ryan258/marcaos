@@ -9,7 +9,7 @@
     {{ with .tagline }}<p class="tagline">{{ . }}</p>{{ end }}
     {{ with .genre }}<p class="genre">{{ . }}</p>{{ end }}
     <button class="ceremony-trigger" data-action="strike-match" type="button" aria-label="{{ i18n "strike_match_aria" }}">
-      <span class="match-icon">🜂</span>
+      <svg class="match-icon match-morph" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 C6 5 4 6 4 9 C4 12 6 14 8 14 C10 14 12 12 12 9 C12 6 10 5 8 1 Z"/></svg>
       <span>{{ i18n "strike_match" }}</span>
     </button>
   </div>

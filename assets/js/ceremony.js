@@ -253,6 +253,56 @@
     }
   });
 
+  // ── Sulfur Spark Physics (#21) — 12 golden-red sparks, gravity + drag ──
+  function spawnSparks() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const cv = document.createElement('canvas');
+    Object.assign(cv.style, {
+      position: 'fixed', inset: '0', width: '100%', height: '100%',
+      pointerEvents: 'none', zIndex: '100', mixBlendMode: 'screen',
+    });
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = innerWidth * dpr;
+    cv.height = innerHeight * dpr;
+    document.body.appendChild(cv);
+
+    const g = cv.getContext('2d');
+    g.scale(dpr, dpr);
+    const cx = innerWidth / 2;
+    const cy = innerHeight / 2;
+    const sparks = Array.from({ length: 12 }, (_, i) => {
+      const a = (Math.PI * 2 * i) / 12 + Math.random() * 0.4;
+      const sp = 4 + Math.random() * 5;
+      return { x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2, life: 1 };
+    });
+
+    let last = performance.now();
+    (function frame(now) {
+      const dt = Math.min(2, (now - last) / 16.7);
+      last = now;
+      g.clearRect(0, 0, innerWidth, innerHeight);
+      let alive = false;
+      for (const s of sparks) {
+        s.vy += 0.35 * dt;                  // gravity
+        s.vx *= Math.pow(0.94, dt);         // drag
+        s.vy *= Math.pow(0.94, dt);
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        s.life -= 0.018 * dt;
+        if (s.life <= 0) continue;
+        alive = true;
+        g.globalAlpha = s.life;
+        g.fillStyle = s.life > 0.5 ? '#ffcf6b' : '#d0011b';
+        g.beginPath();
+        g.arc(s.x, s.y, 2.2, 0, Math.PI * 2);
+        g.fill();
+      }
+      if (alive) requestAnimationFrame(frame);
+      else cv.remove();
+    })(last);
+  }
+
   function igniteCeremony() {
     const ctx = getAudioContext();
     triggerVisualStrike();
@@ -261,10 +311,11 @@
     playMatchStrike();
     document.body.classList.add('ceremony-active');
 
-    // Kick drop shockwave, camera shake impulse, and ambient sub-drone at t=180ms
+    // Kick drop shockwave, camera shake impulse, sparks, sub-drone at t=180ms
     setTimeout(() => {
       triggerShockwave();
       triggerCameraShake();
+      spawnSparks();
       if (ctx) {
         startSubBassDrone(ctx);
       }
@@ -393,6 +444,8 @@
       }).format(new Date()));
       const night = hour >= 20 || hour < 7;
       document.body.classList.toggle('ba-night', night);
+      // #16 — deep-night crushes the whole palette to pure black
+      document.body.classList.toggle('blackout', hour >= 1 && hour < 5);
       el.textContent = (night ? '● ' : '○ ') + 'buenos aires · ' +
         (night ? el.dataset.night : el.dataset.day);
       el.hidden = false;
@@ -475,6 +528,90 @@
     });
   }
 
+  // ── Procedural Smoke Canvas (#17) — smoky brown wisps across the footer ──
+  function bindSmoke() {
+    const cv = document.querySelector('canvas.smoke');
+    if (!cv || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const g = cv.getContext('2d');
+    let w;
+    let h;
+    const resize = () => {
+      w = cv.width = cv.offsetWidth;
+      h = cv.height = cv.offsetHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    const puffs = Array.from({ length: 14 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: 20 + Math.random() * 40,
+      vx: 0.15 + Math.random() * 0.35,
+      a: 0.02 + Math.random() * 0.05,
+    }));
+
+    let raf = 0;
+    const frame = () => {
+      g.clearRect(0, 0, w, h);
+      for (const p of puffs) {
+        p.x += p.vx;
+        if (p.x - p.r > w) { p.x = -p.r; p.y = Math.random() * h; }
+        const grd = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        grd.addColorStop(0, 'rgba(120, 92, 64, ' + p.a + ')');
+        grd.addColorStop(1, 'rgba(120, 92, 64, 0)');
+        g.fillStyle = grd;
+        g.beginPath();
+        g.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        g.fill();
+      }
+      raf = requestAnimationFrame(frame);
+    };
+
+    // Only run the loop while the footer is actually on screen.
+    new IntersectionObserver((es) => {
+      if (es[0].isIntersecting && !raf) raf = requestAnimationFrame(frame);
+      else if (!es[0].isIntersecting && raf) { cancelAnimationFrame(raf); raf = 0; }
+    }).observe(cv);
+  }
+
+  // ── Scroll velocity → --scroll-vel (#22 phosphor ghost, #27 aberration) ──
+  function bindScrollVelocity() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const root = document.documentElement;
+    let last = window.scrollY;
+    let vel = 0;
+    let raf = 0;
+
+    const decay = () => {
+      vel *= 0.85;
+      root.style.setProperty('--scroll-vel', vel.toFixed(3));
+      raf = vel > 0.01 ? requestAnimationFrame(decay) : 0;
+    };
+
+    window.addEventListener('scroll', () => {
+      vel = Math.min(1, vel + Math.abs(window.scrollY - last) / 120);
+      last = window.scrollY;
+      if (!raf) raf = requestAnimationFrame(decay);
+    }, { passive: true });
+  }
+
+  // ── Foretold Light Bleed (#24) — cursor-tracked screen-blend glow ───────
+  function bindLightBleed() {
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    const root = document.documentElement;
+    let raf = 0;
+    window.addEventListener('pointermove', (e) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        root.style.setProperty('--mx', e.clientX + 'px');
+        root.style.setProperty('--my', e.clientY + 'px');
+        document.body.classList.add('bleed-live');
+      });
+    }, { passive: true });
+  }
+
   // Bind igniter triggers & ritual listeners
   document.addEventListener('DOMContentLoaded', () => {
     const strikeTriggers = document.querySelectorAll('[data-action="strike-match"]');
@@ -491,6 +628,9 @@
     bindCountdown();
     bindCeremonyProgress();
     bindShare();
+    bindSmoke();
+    bindScrollVelocity();
+    bindLightBleed();
   });
 })();
 

@@ -5,7 +5,16 @@
   <div class="void-overlay" aria-hidden="true"></div>
   <div class="blackout-vignette" aria-hidden="true"></div>
   <div class="alley-grid" aria-hidden="true"></div>
+  <div class="fog" aria-hidden="true"></div>
+  <div class="halo" aria-hidden="true"></div>
+  <div class="light-bleed" aria-hidden="true"></div>
   <div class="scroll-needle" aria-hidden="true"></div>
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <filter id="daguerre">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+    </filter>
+  </svg>
   {{ if gt (len .AllTranslations) 1 }}
   <nav class="langs" aria-label="language">
     {{ range .AllTranslations }}
@@ -19,6 +28,7 @@
   </main>
   {{ with .Site.Params.footer.lines }}
   <footer>
+    <canvas class="smoke" aria-hidden="true"></canvas>
     {{ range . }}<p{{ if .dim }} class="whisper"{{ end }}>{{ .text | markdownify }}</p>{{ end }}
   </footer>
   {{ end }}

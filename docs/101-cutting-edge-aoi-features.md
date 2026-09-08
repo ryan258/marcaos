@@ -17,7 +17,6 @@ Ranked by payoff for this site.
 | Feature | What it buys us | Notes |
 |---|---|---|
 | **Procedural Tape Hiss & Wow/Flutter (#1)** | Subtly modulated pitch-shifted noise emulating an old cassette found in Parque Centenario | Web Audio buffer source + LFO pitch modulator |
-| **Sulfur Spark Physics (#21)** | Lightweight canvas particle burst radiating 12 golden-red sparks on match strike with gravity and drag | Canvas overlay triggered at friction strike instant |
 | **Offline Ceremony PWA (#85)** | Installable PWA with full offline caching of procedural audio synthesis and tour dates | Service worker + web manifest |
 | **Self-Contained Single-File EPK Export (#94)** | Inline HTML bundle with embedded base64 assets for press and bookings | Automated build artifact generation |
 
@@ -56,21 +55,9 @@ A catalog of 101 platform-native ideas for progressive house, live ceremony ritu
 15. **Clock-Synchronized Solstice Drone**: Web Audio oscillator tuning that subtly alters microtonal pitch based on the user's solar hour (dusk, midnight, dawn).
 
 ### II. Atmosphere, Void & Optical Illusion (16–30)
-16. **Dynamic Blackout Mode**: CSS variable toggle cutting all light elements to pure `#000000` except a burning match cursor during night hours.
-17. **Procedural Smoke Canvas with Zero Libs**: 40-line canvas particle system rendering smoky brown whisps drifting across the footer.
-18. **Additive Halo Blending (`mix-blend-mode: plus-lighter`)**: Spectral violet and copper overlapping rings creating pure white hot spots at intersection nodes.
-19. **Sepia Blackout Vignette with SVG Noise**: Perlin noise distortion map warping background dark tones into an antique argentinian daguerreotype.
-20. **CSS Color-Mix Ghost Transitions**: `color-mix(in oklch, var(--ritual-red) 30%, transparent)` creating smooth luminance-preserving dark glows.
-21. **Sulfur Spark Physics**: Canvas particle burst radiating 12 golden-red sparks on match strike with gravity and drag physics.
-22. **Phosphor CRT Ghosting**: SVG filter simulating beam persistence on white typography when scrolling rapidly.
-23. **Backdrop Smoked Glass (`backdrop-filter: blur(16px) brightness(0.7)`)**: Smoked obsidian panels overlaying the void texture on modal EPK layers.
-24. **Foretold Light Bleed**: Radial gradient following cursor coordinates with `mix-blend-mode: screen` illuminating hidden text underneath.
-25. **Tiled Alleyway Grid Illusion**: Sub-pixel isometric hairline grid fading in only at deep scroll depths representing San Telmo cobbles.
-26. **Variable Opacity Fog Layers**: Multi-layered SVG turbulence clouds translating at prime-numbered speeds to prevent repeating loops.
-27. **Alchemical Chromatic Aberration**: Split red/violet text shadows on rapid scroll using CSS `@property` velocity tracking.
-28. **Solar Blackout Eclipse**: Concentric CSS circle shadows that slowly eclipse the hero artist portrait over a 60-second dwell time.
-29. **Match Flame SVG Morph**: Animated SVG path morphing a match flame contour into a UFO transmission glyph.
-30. **High-Contrast Ritual Mode**: Accessible high-contrast mode styled as stark black-and-white photocopy zine art.
+
+All shipped — see `CHANGELOG.md` (§16–30). Kept the section heading so the
+numbered ranges below still line up with the original catalog.
 
 ### III. Spatial Depth, Parallax & Compositor Motion (31–45)
 31. **Multi-Plane 3D Stage**: 5 distinct z-index planes (`translateZ(-200px)` to `translateZ(100px)`) shifting with pointer tilt.

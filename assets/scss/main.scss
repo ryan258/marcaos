@@ -891,3 +891,211 @@ body.ba-night {
 @media (prefers-reduced-motion: reduce) {
   .alley-grid { display: none !important; }
 }
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  batch 3 — §16–30 · atmosphere, void & optical illusion
+//  All gated: @supports / prefers-reduced-motion / pointer / prefers-contrast.
+//  §25 (alley grid) already shipped in batch 2.
+// ═══════════════════════════════════════════════════════════════════
+
+// #16 — dynamic blackout: deep-night BA hours crush every tint to pure
+// black and swap in a burning-match cursor. Toggled by bindBuenosAiresClock().
+body.blackout {
+  --bg: #000000;
+  --text: #f2f2f2;
+  --muted: #6a6a6a;
+  background: #000000;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect x='12' y='10' width='4' height='15' fill='%23b87333'/%3E%3Cellipse cx='14' cy='7' rx='4' ry='7' fill='%23d0011b'/%3E%3Cellipse cx='14' cy='8' rx='2' ry='4' fill='%23ffcf6b'/%3E%3C/svg%3E") 14 7, auto;
+
+  .void-overlay, .blackout-vignette, .alley-grid, .fog, .halo { opacity: 0; }
+  .hero { filter: none; background: #000000; }
+  h1, h2 { color: var(--text); text-shadow: none; }
+  a { color: #ff3b3b; }
+}
+
+// #20 — oklch color-mix ghost glows (luminance-preserving dark reds/violets)
+@supports (color: #{"color-mix(in oklch, red, blue)"}) {
+  :root {
+    --ghost-red: #{"color-mix(in oklch, var(--accent) 30%, transparent)"};
+    --ghost-violet: #{"color-mix(in oklch, var(--accent2) 30%, transparent)"};
+  }
+  .block:hover h2 { text-shadow: 0 0 24px var(--ghost-violet); }
+  .dates li:hover {
+    box-shadow: -18px 22px 40px rgba($bg, 0.6), 0 0 30px var(--ghost-red);
+  }
+}
+
+// #18 — additive halo blending: violet + copper rings, plus-lighter blend
+// burns pure-white hot spots where the two strokes overlap.
+.halo {
+  position: fixed;
+  right: -6rem;
+  bottom: -6rem;
+  width: 22rem;
+  height: 22rem;
+  pointer-events: none;
+  z-index: 96;
+  opacity: 0.4;
+  isolation: isolate;
+
+  &::before, &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid;
+    mix-blend-mode: plus-lighter;
+  }
+  &::before { border-color: rgba($accent2, 0.9); transform: translateX(-2.5rem); }
+  &::after  { border-color: rgba($rule, 0.9);    transform: translateX(2.5rem); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes halo-breathe { 50% { transform: translateX(0) scale(1.06); } }
+  .halo::before { animation: halo-breathe $tempo-phrase infinite ease-in-out; }
+  .halo::after  { animation: halo-breathe $tempo-phrase infinite ease-in-out reverse; }
+}
+
+// #19 — sepia daguerreotype vignette: SVG turbulence displacement (filter
+// #daguerre lives inline in baseof.html) warps the dark tones at BA night.
+body.ba-night {
+  .blackout-vignette { filter: sepia(0.5) contrast(1.15) brightness(0.92); }
+  .void-overlay { filter: url("#daguerre"); opacity: 0.06; }
+}
+
+// #23 — backdrop smoked obsidian glass. No modal / EPK layer in this site
+// yet, so applied to the press block — the closest thing to one.
+// ponytail: retarget at a real .modal when one exists.
+.press-block {
+  background: rgba($bg, 0.4);
+  backdrop-filter: blur(16px) brightness(0.7);
+  -webkit-backdrop-filter: blur(16px) brightness(0.7);
+}
+
+// #26 — variable-opacity fog: three turbulence layers translating at
+// prime-second periods so the composite loop never visibly repeats.
+.fog {
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 95;
+  opacity: 0.32;
+  background: repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.5'/%3E%3C/svg%3E");
+  -webkit-mask: radial-gradient(ellipse at 50% 120%, #000, transparent 70%);
+          mask: radial-gradient(ellipse at 50% 120%, #000, transparent 70%);
+
+  &::before, &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: inherit;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fog-a { to { transform: translate3d(7%, -3%, 0); } }
+  @keyframes fog-b { to { transform: translate3d(-11%, 4%, 0); } }
+  @keyframes fog-c { to { transform: translate3d(13%, -6%, 0); } }
+  .fog          { animation: fog-a 71s linear infinite alternate; }
+  .fog::before  { animation: fog-b 113s linear infinite alternate; opacity: 0.6; }
+  .fog::after   { animation: fog-c 173s linear infinite alternate; opacity: 0.4; }
+}
+
+// #22 + #27 — scroll-velocity phosphor ghost & chromatic aberration.
+// bindScrollVelocity() writes --scroll-vel (0..1) to :root.
+@property --scroll-vel {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  h2, .hero .tagline, .quotes li, .dates .c {
+    text-shadow:
+      calc(var(--scroll-vel) * -3px) 0 rgba($accent, 0.55),
+      calc(var(--scroll-vel) *  3px) 0 rgba($accent2, 0.55);
+  }
+  .hero h1 { filter: blur(calc(var(--scroll-vel) * 0.6px)); }  // #22 beam persistence
+}
+
+// #24 — foretold light bleed: a soft radius tracks the cursor and
+// screen-blends over the void, lifting whatever sits beneath it.
+@media (pointer: fine) {
+  .light-bleed {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 97;
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: #{"radial-gradient(circle 18rem at var(--mx, 50%) var(--my, 50%), rgba(184, 115, 51, 0.10) 0%, rgba(127, 0, 255, 0.05) 40%, transparent 70%)"};
+  }
+  body.bleed-live .light-bleed { opacity: 1; }
+}
+
+// #17 — procedural smoke drifting across the footer (canvas, bindSmoke())
+footer { position: relative; }
+canvas.smoke {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+footer p { position: relative; z-index: 1; }
+
+// #28 — solar blackout eclipse: a dark disc crawls across the hero over a
+// 60s dwell then holds, multiplying down the portrait as it passes.
+@media (prefers-reduced-motion: no-preference) {
+  .hero::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 120vmin;
+    height: 120vmin;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, #000 0 34%, rgba(0, 0, 0, 0.55) 42%, transparent 62%);
+    mix-blend-mode: multiply;
+    opacity: 0;
+    transform: translate(60%, -50%);
+    animation: eclipse 60s cubic-bezier(0.4, 0, 0.2, 1) 4s forwards;
+  }
+  @keyframes eclipse {
+    0%   { opacity: 0; transform: translate(60%, -50%); }
+    12%  { opacity: 1; }
+    100% { opacity: 1; transform: translate(-30%, -50%); }
+  }
+}
+
+// #29 — match-flame → UFO glyph morph on the ceremony-trigger icon.
+// Firefox can't animate `d` via CSS yet — it just holds the flame. Fine.
+.match-morph {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  color: $accent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes flame-ufo {
+    to { d: #{'path("M1 9 C1 7 4 6 8 6 C12 6 15 7 15 9 C15 11 12 12 8 12 C4 12 1 11 1 9 Z")'}; }
+  }
+  .match-morph path { animation: flame-ufo $tempo-phrase infinite alternate ease-in-out; }
+}
+
+// #30 — high-contrast ritual mode: stark black-on-white photocopy zine
+@media (prefers-contrast: more), (forced-colors: active) {
+  :root { --bg: #ffffff; --text: #000000; --muted: #000000; --accent: #000000; }
+  body { background: #fff; color: #000; }
+  .void-overlay, .blackout-vignette, .alley-grid, .fog, .halo,
+  .hero-sigil, .scroll-needle, .kick-shockwave, .light-bleed { display: none !important; }
+  .hero { filter: grayscale(1) contrast(2.5); background: #fff; }
+  .hero::after { display: none !important; }
+  h1, h2, a, .whisper { color: #000 !important; text-shadow: none !important; }
+  a { text-decoration: underline; border: 0; }
+  .block, .dates li, .quotes li { border-color: #000 !important; }
+  * { box-shadow: none !important; }
+}

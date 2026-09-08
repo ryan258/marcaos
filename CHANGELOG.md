@@ -7,6 +7,29 @@ this project is a rolling static site and is not versioned.
 
 ### Added
 
+- **14 more platform-native features** (`docs/101-cutting-edge-aoi-features.md`
+  §16–30; §25 already shipped in batch 2), all `@supports` /
+  `prefers-reduced-motion` / `pointer` / `prefers-contrast` gated:
+  - Dynamic blackout mode — deep-night BA hours crush the palette to pure
+    `#000` + burning-match cursor (#16)
+  - Procedural smoke canvas across the footer — ~40-line particle system,
+    zero libs, `IntersectionObserver`-paused (#17)
+  - Additive halo blending — violet + copper rings, `mix-blend-mode:
+    plus-lighter` white hot spots (#18)
+  - Sepia daguerreotype vignette — inline SVG `feDisplacementMap` warps the
+    void at BA night (#19)
+  - `color-mix(in oklch, …)` ghost glows on block / date hover (#20)
+  - Sulfur spark physics — 12 golden-red sparks with gravity + drag on match
+    strike (#21)
+  - Phosphor CRT ghosting + chromatic aberration — `@property --scroll-vel`
+    fed by a scroll-velocity rAF loop (#22, #27)
+  - Backdrop smoked obsidian glass on the press/EPK panel (#23)
+  - Foretold light bleed — cursor-tracked `mix-blend-mode: screen` radius (#24)
+  - Variable-opacity fog — three turbulence layers drifting at prime-second
+    periods (#26)
+  - Solar blackout eclipse — dark disc crawls the hero over a 60s dwell (#28)
+  - Match-flame → UFO glyph morph via CSS `d` animation (#29)
+  - High-contrast ritual mode — black-on-white photocopy zine (#30)
 - **Bilingual site** — lunfardo castellano (default, `/`) and american english
   (`/en/`), via Hugo's native multilingual config. Top-right language switcher,
   `hreflang` alternates, and `i18n/{es,en}.toml` for fixed UI strings. Prose
