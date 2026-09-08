@@ -5,6 +5,10 @@ this project is a rolling static site and is not versioned.
 
 ## [Unreleased]
 
+### Changed
+
+- **Dynamic Blackout Mode (#16)**: Deep-night BA hours now crush the hero portrait to a monochrome shadow (`filter: saturate(0) brightness(0.35)`) instead of wiping it with solid black, preserving portrait visibility while maintaining copy contrast.
+
 ### Added
 
 - **Full Section III: Spatial Depth, Parallax & Compositor Motion** (`docs/101-cutting-edge-aoi-features.md` §31–45):

@@ -1415,7 +1415,7 @@ body.blackout {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect x='12' y='10' width='4' height='15' fill='%23b87333'/%3E%3Cellipse cx='14' cy='7' rx='4' ry='7' fill='%23d0011b'/%3E%3Cellipse cx='14' cy='8' rx='2' ry='4' fill='%23ffcf6b'/%3E%3C/svg%3E") 14 7, auto;
 
   .void-overlay, .blackout-vignette, .alley-grid, .fog, .halo { opacity: 0; }
-  .hero { filter: none; background: #000000; }
+  .hero { filter: saturate(0) brightness(0.35); }
   h1, h2 { color: var(--text); text-shadow: none; }
   a { color: #ff3b3b; }
 }
