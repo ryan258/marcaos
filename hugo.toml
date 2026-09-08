@@ -31,12 +31,12 @@ defaultContentLanguageInSubdir = false  # es at /, en at /en/
 
 [languages.es]
 title = "Marcaos"
-label = "lunfardo castellano"
+label = "ARG"
 locale = "es_AR"
 weight = 1
 
 [languages.en]
-label = "american english"
+label = "ENG"
 locale = "en_US"
 weight = 2
 
