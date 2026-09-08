@@ -379,6 +379,80 @@
     })(last);
   }
 
+  // ── Bandoneón Texture Filter (#3) ────────────────────────────────
+  // Periodic harmonic notch/comb filter shaping noise bursts to emulate
+  // the breathing bellows of a distant tango accordion across San Telmo.
+  function playBandoneonTexture(ctx) {
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const duration = 2.4;
+
+    const bufferSize = Math.floor(ctx.sampleRate * duration);
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * 0.35;
+    }
+
+    const noiseSource = ctx.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+
+    // Resonant bandpass at bandoneón low reed fundamental (220 Hz, A3)
+    const f1 = ctx.createBiquadFilter();
+    f1.type = 'bandpass';
+    f1.frequency.setValueAtTime(220, now);
+    f1.Q.setValueAtTime(6.5, now);
+
+    // Peaking formant at octave reed (440 Hz, A4)
+    const f2 = ctx.createBiquadFilter();
+    f2.type = 'peaking';
+    f2.frequency.setValueAtTime(440, now);
+    f2.Q.setValueAtTime(5.0, now);
+    f2.gain.setValueAtTime(3.5, now);
+
+    // Notch filter at 660 Hz simulating bellows body hollow cancellation
+    const f3 = ctx.createBiquadFilter();
+    f3.type = 'notch';
+    f3.frequency.setValueAtTime(660, now);
+    f3.Q.setValueAtTime(4.0, now);
+
+    // Bellows breathing LFO (0.35 Hz) modulating filter cutoff
+    const bellowsLfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    bellowsLfo.frequency.setValueAtTime(0.35, now);
+    lfoGain.gain.setValueAtTime(16, now);
+    bellowsLfo.connect(lfoGain);
+    lfoGain.connect(f1.frequency);
+
+    // Comb acoustic body resonance (4.5ms delay line)
+    const delay = ctx.createDelay();
+    delay.delayTime.setValueAtTime(0.0045, now);
+    const delayFeedback = ctx.createGain();
+    delayFeedback.gain.setValueAtTime(0.3, now);
+    delay.connect(delayFeedback);
+    delayFeedback.connect(delay);
+
+    // Amplitude envelope simulating bellows squeeze & release (gentle atmospheric bed)
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0.0001, now);
+    masterGain.gain.exponentialRampToValueAtTime(0.11, now + 0.45);
+    masterGain.gain.exponentialRampToValueAtTime(0.06, now + duration * 0.65);
+    masterGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    noiseSource.connect(f1);
+    f1.connect(f2);
+    f2.connect(f3);
+    f3.connect(delay);
+    f3.connect(masterGain);
+    delay.connect(masterGain);
+    masterGain.connect(ctx.destination);
+
+    bellowsLfo.start(now);
+    noiseSource.start(now);
+    bellowsLfo.stop(now + duration);
+    noiseSource.stop(now + duration);
+  }
+
   function igniteCeremony() {
     const ctx = getAudioContext();
     triggerVisualStrike();
@@ -386,14 +460,16 @@
     requestWakeLock();
     playMatchStrike();
     document.body.classList.add('ceremony-active');
+    unlockMatchGate();
 
-    // Kick drop shockwave, camera shake impulse, sparks, sub-drone at t=180ms
+    // Kick drop shockwave, camera shake impulse, sparks, sub-drone, bandoneón texture at t=180ms
     setTimeout(() => {
       triggerShockwave();
       triggerCameraShake();
       spawnSparks();
       if (ctx) {
         startSubBassDrone(ctx);
+        playBandoneonTexture(ctx);
       }
     }, 180);
   }
@@ -846,6 +922,191 @@
     });
   }
 
+  // ── The Match Strike Gate (#47) ──────────────────────────────────
+  function unlockMatchGate() {
+    try {
+      sessionStorage.setItem('marcaos_match_ignited', 'true');
+    } catch (e) {}
+    const gatedLists = document.querySelectorAll('.dates[data-match-gated]');
+    gatedLists.forEach((list) => {
+      list.removeAttribute('data-match-gated');
+    });
+    const ticketLinks = document.querySelectorAll('.dates .ticket-link');
+    ticketLinks.forEach((link) => {
+      link.removeAttribute('tabindex');
+      link.removeAttribute('aria-hidden');
+    });
+  }
+
+  function bindMatchGate() {
+    try {
+      if (sessionStorage.getItem('marcaos_match_ignited') === 'true') {
+        unlockMatchGate();
+        return;
+      }
+    } catch (e) {}
+
+    const gateLocks = document.querySelectorAll('.gate-lock');
+    gateLocks.forEach((el) => {
+      el.addEventListener('click', (e) => {
+        const isGated = el.closest('.dates[data-match-gated]');
+        if (isGated) {
+          e.preventDefault();
+          igniteCeremony();
+        }
+      });
+    });
+  }
+
+  // ── Fortune Teller Tarot Draw (#52) ──────────────────────────────
+  const TAROT_PROPHECIES = [
+    {
+      numeral: 'I',
+      glyph: '🜂',
+      title: { es: 'El Fueguero', en: 'The Firestarter' },
+      quote: {
+        es: 'El fuego no destruye: revela la ceniza que ya éramos.',
+        en: 'The fire does not destroy: it reveals the ash we already were.'
+      }
+    },
+    {
+      numeral: 'II',
+      glyph: '🜄',
+      title: { es: 'La Niebla de Centenario', en: 'The Fog of Centenario' },
+      quote: {
+        es: 'En la penumbra del parque, tres días son mil años.',
+        en: 'In the park’s gloom, three days are a thousand years.'
+      }
+    },
+    {
+      numeral: 'III',
+      glyph: '☿',
+      title: { es: 'El Bandoneón Negro', en: 'The Black Bandoneón' },
+      quote: {
+        es: 'El fuelle respira un aire que ningún vivo exhaló.',
+        en: 'The bellows breathe an air that no living lung exhaled.'
+      }
+    },
+    {
+      numeral: 'IV',
+      glyph: '☉',
+      title: { es: 'El Reloj de Medianoche', en: 'The Midnight Clock' },
+      quote: {
+        es: 'A las doce en San Telmo, toda sombra busca a su dueño.',
+        en: 'At midnight in San Telmo, every shadow seeks its owner.'
+      }
+    },
+    {
+      numeral: 'V',
+      glyph: '🜏',
+      title: { es: 'La Llave de Azufre', en: 'The Sulfur Key' },
+      quote: {
+        es: 'La puerta sólo cede ante quien huele a pólvora.',
+        en: 'The door yields only to the one who smells of powder.'
+      }
+    },
+    {
+      numeral: 'VI',
+      glyph: '🜃',
+      title: { es: 'La Transmisión Vacía', en: 'The Empty Transmission' },
+      quote: {
+        es: 'Escuchá el silencio entre compases: allí reside el rito.',
+        en: 'Listen to the silence between bars: there resides the ritual.'
+      }
+    },
+    {
+      numeral: 'VII',
+      glyph: '☽',
+      title: { es: 'La Última Nieve', en: 'The Final Snow' },
+      quote: {
+        es: 'Cuando caiga la última nota, el eco será eterno.',
+        en: 'When the last note falls, the echo will be eternal.'
+      }
+    }
+  ];
+
+  function playTarotChime(ctx) {
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const freqs = [528, 792, 1056];
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.07 / (idx + 1), now + idx * 0.04 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.04 + 1.8);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + idx * 0.04);
+      osc.stop(now + idx * 0.04 + 1.85);
+    });
+
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(110, now);
+    subOsc.frequency.exponentialRampToValueAtTime(55, now + 1.2);
+    subGain.gain.setValueAtTime(0.0001, now);
+    subGain.gain.exponentialRampToValueAtTime(0.12, now + 0.08);
+    subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
+    subOsc.connect(subGain);
+    subGain.connect(ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 2.05);
+  }
+
+  function bindTarotOracle() {
+    const card = document.getElementById('tarot-card');
+    if (!card) return;
+
+    const drawBtns = card.querySelectorAll('[data-action="draw-prophecy"]');
+    const tarotBack = card.querySelector('.tarot-face.tarot-back');
+    const tarotFront = card.querySelector('.tarot-face.tarot-front');
+    const numeralEl = card.querySelector('.tarot-numeral');
+    const glyphEl = card.querySelector('.tarot-glyph');
+    const titleEl = card.querySelector('.tarot-title');
+    const quoteEl = card.querySelector('.tarot-quote');
+
+    let lastIdx = -1;
+
+    function drawCard() {
+      const ctx = getAudioContext();
+      if (ctx) {
+        playTarotChime(ctx);
+      }
+
+      let nextIdx;
+      do {
+        nextIdx = Math.floor(Math.random() * TAROT_PROPHECIES.length);
+      } while (nextIdx === lastIdx && TAROT_PROPHECIES.length > 1);
+      lastIdx = nextIdx;
+
+      const p = TAROT_PROPHECIES[nextIdx];
+      const lang = (document.documentElement.lang || 'es').startsWith('en') ? 'en' : 'es';
+
+      if (numeralEl) numeralEl.textContent = p.numeral;
+      if (glyphEl) glyphEl.textContent = p.glyph;
+      if (titleEl) titleEl.textContent = p.title[lang] || p.title.es;
+      if (quoteEl) quoteEl.textContent = p.quote[lang] || p.quote.es;
+
+      if (tarotBack) tarotBack.setAttribute('aria-hidden', 'true');
+      if (tarotFront) tarotFront.setAttribute('aria-hidden', 'false');
+
+      card.classList.remove('flipped');
+      void card.offsetWidth;
+      card.classList.add('flipped');
+    }
+
+    drawBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        drawCard();
+      });
+    });
+  }
+
   // Bind igniter triggers & ritual listeners
   document.addEventListener('DOMContentLoaded', () => {
     const strikeTriggers = document.querySelectorAll('[data-action="strike-match"]');
@@ -869,6 +1130,8 @@
     bindSplitSoul();
     bindBatteryConservation();
     bindRadioTuner();
+    bindMatchGate();
+    bindTarotOracle();
     registerServiceWorker();
   });
 })();

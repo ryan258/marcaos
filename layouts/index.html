@@ -61,6 +61,31 @@
 </section>
 {{ end }}{{ end }}
 
+<section class="block tarot-block" id="tarot">
+  <span class="alch-badge" aria-hidden="true">☽</span>
+  <h2 id="tarot-heading">{{ i18n "tarot_heading" }}</h2>
+  <div class="tarot-stage">
+    <div class="tarot-card" id="tarot-card" role="region" aria-labelledby="tarot-heading" aria-live="polite">
+      <div class="tarot-card-inner">
+        <div class="tarot-face tarot-back" aria-hidden="false">
+          <div class="tarot-sigil" aria-hidden="true">🜏</div>
+          <p class="tarot-hint">{{ i18n "tarot_prompt" }}</p>
+          <button class="tarot-trigger-btn" type="button" data-action="draw-prophecy">{{ i18n "tarot_draw" }}</button>
+        </div>
+        <div class="tarot-face tarot-front" aria-hidden="true">
+          <div class="tarot-card-header">
+            <span class="tarot-numeral"></span>
+            <span class="tarot-glyph" aria-hidden="true"></span>
+          </div>
+          <h3 class="tarot-title"></h3>
+          <blockquote class="tarot-quote"></blockquote>
+          <button class="tarot-trigger-btn tarot-redraw-btn" type="button" data-action="draw-prophecy">{{ i18n "tarot_redraw" }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 {{ with where site.RegularPages "Section" "ceremonies" }}
 <section class="block shows-block">
   <span class="alch-badge" aria-hidden="true">🜄</span>

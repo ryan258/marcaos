@@ -1,12 +1,17 @@
 {{ $pages := where .Site.RegularPages "Section" "ceremonies" }}
 {{ with $pages }}
-<ul class="dates">
+<ul class="dates" data-match-gated="true">
   {{ range .ByDate }}
   <li>
     <span class="d">{{ with .Params.dateLabel }}{{ . }}{{ else }}{{ .Date.Format "2006.01.02" }}{{ end }}</span>
     <span class="c"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
     {{ with .Params.venue }}<span class="v">{{ . | markdownify }}</span>{{ end }}
-    {{ with .Params.tickets }}<span class="t"><a href="{{ . }}" rel="noopener">{{ i18n "tickets" }}</a></span>{{ end }}
+    {{ with .Params.tickets }}
+    <span class="t match-gate">
+      <a href="{{ . }}" rel="noopener" class="ticket-link" tabindex="-1" aria-hidden="true">{{ i18n "tickets" }}</a>
+      <button type="button" class="gate-lock" aria-label="{{ i18n "strike_gate_hint" }}" title="{{ i18n "strike_gate_hint" }}">🜂</button>
+    </span>
+    {{ end }}
   </li>
   {{ end }}
 </ul>
