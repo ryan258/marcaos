@@ -7,6 +7,27 @@ this project is a rolling static site and is not versioned.
 
 ### Added
 
+- **14 platform-native features** (`docs/101-cutting-edge-aoi-features.md`
+  §1, §32, §34, §35, §50, §54, §61, §62, §64, §67, §69, §70, §76, §85):
+  - Procedural tape hiss & wow/flutter — pink noise buffer with LFO pitch
+    wobble emulating Parque Centenario cassette (#1)
+  - Scroll-velocity directional card skew — signed `--scroll-dir-vel` skewY (#32)
+  - Receding void hero — scales down into negative Z-space on scroll (#34)
+  - Floating 3D date cards — pointer normal-vector tilt and depth shadow (#35)
+  - The Split Soul toggle — switches between Marchaos transmission and
+    Marcos acoustic memory (#50)
+  - The Lost Signal 404 Radio — interactive frequency dial (88–126 MHz)
+    with Web Audio static and 126.0 MHz locked demo riff (#54)
+  - Alchemical Unicode glyph system — `🜂`, `🜃`, `🜄`, `☉`, `🜏` section badges (#61)
+  - Variable font weight breath oscillating at 126 BPM (#62)
+  - Interrupted strikethroughs with copper hairline and burning endpoints (#64)
+  - Redacted Marcos memory fragments that smoke away on hover/tap (#67)
+  - Spectral violet text glows with dual-layer oklch highlights (#69)
+  - Monospace transmission callouts with blinking terminal prompt (#70)
+  - Battery status power conservation — disables canvas smoke and blur when
+    battery < 20% (#76)
+  - Offline Ceremony PWA — Web App Manifest and Service Worker, network-first
+    for navigation, stale-while-revalidate for static assets (#85)
 - **14 more platform-native features** (`docs/101-cutting-edge-aoi-features.md`
   §16–30; §25 already shipped in batch 2), all `@supports` /
   `prefers-reduced-motion` / `pointer` / `prefers-contrast` gated:

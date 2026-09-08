@@ -16,9 +16,11 @@ Ranked by payoff for this site.
 
 | Feature | What it buys us | Notes |
 |---|---|---|
-| **Procedural Tape Hiss & Wow/Flutter (#1)** | Subtly modulated pitch-shifted noise emulating an old cassette found in Parque Centenario | Web Audio buffer source + LFO pitch modulator |
-| **Offline Ceremony PWA (#85)** | Installable PWA with full offline caching of procedural audio synthesis and tour dates | Service worker + web manifest |
-| **Self-Contained Single-File EPK Export (#94)** | Inline HTML bundle with embedded base64 assets for press and bookings | Automated build artifact generation |
+| **Bandoneón Texture Filter (#3)** | Periodic harmonic notch/comb filter shaping noise bursts to emulate a distant tango accordion | Web Audio BiquadFilter / Convolver |
+| **The Match Strike Gate (#47)** | Ritual gate requiring striking the match before ceremony ticket links reveal themselves | Session gating + glowing ember reveal |
+| **Fortune Teller Tarot Draw (#52)** | Digital card draw revealing one of 7 Marchaos prophecies with ambient sound motif | Buenos Aires fortune teller lore |
+
+*(#1, #85, #94 shipped — see `CHANGELOG.md`)*
 
 
 
@@ -38,7 +40,7 @@ Ranked by payoff for this site.
 A catalog of 101 platform-native ideas for progressive house, live ceremony ritualism, and web-native artist interfaces, categorized by technical domain.
 
 ### I. Sonic Architecture & Procedural Synthesis (1–15)
-1. **Procedural Tape Hiss & Wow/Flutter**: Filtered pink noise with an LFO subtly modulating pitch to emulate an old cassette found in Parque Centenario.
+1. **Procedural Tape Hiss & Wow/Flutter**: _Shipped — see `CHANGELOG.md`._
 2. **Sub-Bass Drone Anchor**: Continuous 38Hz binaural sine wave pulsing at 126 BPM on user interaction, ducking automatically on deep page scroll.
 3. **Bandoneón Texture Filter**: Periodic harmonic notch filter shaping noise bursts to emulate the bellows of a distant tango accordion.
 4. **Distance Attenuation on Scroll**: Spatial Web Audio `PannerNode` moving sound from intimate headphone proximity to a deep rooftop hall as user scrolls downward.
@@ -61,10 +63,10 @@ numbered ranges below still line up with the original catalog.
 
 ### III. Spatial Depth, Parallax & Compositor Motion (31–45)
 31. **Multi-Plane 3D Stage**: 5 distinct z-index planes (`translateZ(-200px)` to `translateZ(100px)`) shifting with pointer tilt.
-32. **Scroll-Velocity Tilt**: CSS `transform: skewY(calc(var(--velocity) * 1deg))` causing ceremony cards to dynamically bend under hard scroll.
+32. **Scroll-Velocity Tilt**: _Shipped — see `CHANGELOG.md`._
 33. **Scroll-Driven Timeline Spine Burn**: The red timeline border uses `animation-timeline: scroll()` to draw itself down the page like a burning fuse.
-34. **Receding Void Hero**: Hero portrait scales down while moving into negative Z-space as user scrolls down, mimicking stepping away from the vessel.
-35. **Ceremony Floating Date Cards**: 3D card tilt on hover calculating normal vector from mouse position across X and Y axes.
+34. **Receding Void Hero**: _Shipped — see `CHANGELOG.md`._
+35. **Ceremony Floating Date Cards**: _Shipped — see `CHANGELOG.md`._
 36. **View-Timeline Staggered Quote Reveal**: Individual quote lines fade in with progressive delay keyed to scrollport entry percentages.
 37. **Sticky Ritual Altar**: Central talisman icon pins to screen center while quotes rotate around it in 3D carousel space.
 38. **Scroll-Linked Bandoneón Bellows**: Page margin accordion compression as user reaches the ceremony dates section.
@@ -81,11 +83,11 @@ numbered ranges below still line up with the original catalog.
 47. **The Match Strike Gate**: Optional ritual gate requiring striking the match before the ceremony ticket links reveal themselves.
 48. **Coordinates Decryption**: Tour venue addresses rendered in cipher text that decrypts letter-by-letter on hover.
 49. **Ghost Guestbook**: Ephemeral guestbook where fan messages fade into smoke over 30 seconds via localStorage decay.
-50. **The Split Soul Toggle**: Interactive toggle switching perspective between "Marcos" (memory fragments) and "Marchaos" (ceremony transmission).
+50. **The Split Soul Toggle**: _Shipped — see `CHANGELOG.md`._
 51. **Buenos Aires Blackout Clock**: Live status indicator displaying whether Buenos Aires is currently in night or day, altering site ambiance.
 52. **Fortune Teller Tarot Draw**: Digital card draw revealing one of 7 Marchaos prophecies with sound motif.
 53. **Cryptic Tour RSVP**: Ticket RSVP button that outputs a cryptographic ceremony pass stored in Apple Wallet / web pass.
-54. **The Lost Signal 404 Radio**: 404 page featuring an interactive static tuner where dialing 126.0 reveals an unreleased demo snippet.
+54. **The Lost Signal 404 Radio**: _Shipped — see `CHANGELOG.md`._
 55. **Secret Keystroke Ritual**: Typing `D-R-O-P` initiates a blackout and plays a match strike sequence.
 56. **The Solstice Transmission Mode**: Automatic site theme shift during solar solstices and equinoxes.
 57. **Whisper Archive Modal**: Popover containing fragmented quotes recorded from the Parque Centenario fog.
@@ -94,16 +96,16 @@ numbered ranges below still line up with the original catalog.
 60. **The Vessel Vow**: Modal prompt on entry: "do you receive?" setting a session token that unlocks unreleased ambient stems.
 
 ### V. Micro-Typography & Occult Symbolism (61–72)
-61. **Alchemical Unicode Glyph System**: Full hierarchy using Unicode symbols (`🜂`, `🜃`, `🜄`, `🜁`, `🜏`, `☿`, `☉`, `☽`) as semantic section badges.
-62. **Variable Font Weight Breath**: Variable serif font smoothly oscillating between `font-weight: 300` and `font-weight: 500` at 126 BPM.
+61. **Alchemical Unicode Glyph System**: _Shipped — see `CHANGELOG.md`._
+62. **Variable Font Weight Breath**: _Shipped — see `CHANGELOG.md`._
 63. **All-Lowercase Poetic Tone Enforcement**: CSS `text-transform: lowercase` with selective capitalization locks matching Marchaos persona.
-64. **Interrupted Strikethroughs**: Strikethrough lines passing through text styled as copper hairlines with burning endpoints.
+64. **Interrupted Strikethroughs**: _Shipped — see `CHANGELOG.md`._
 65. **Flickering Neon Candle Ligatures**: Custom SVG ligatures for "ch" and "os" that subtly flicker like dying candle flames.
 66. **San Telmo Street Plaque Typography**: Section numerals styled after 1920s Buenos Aires ceramic street tiles.
-67. **Redacted Text Reveals**: Black marker redactions that dissolve on cursor hover to reveal Marcos backstory fragments.
+67. **Redacted Text Reveals**: _Shipped — see `CHANGELOG.md`._
 68. **Optical Margin Alignment (`hanging-punctuation: first last`)**: Quotes hanging naturally outside the editorial column.
-69. **Spectral Violet Text Glows**: Dual layered `text-shadow` using oklch spectral violet highlights on hover.
-70. **Monospace Transmission Callouts**: EPK technical data rendered in tight tracking `SFMono` with blinking terminal prompt.
+69. **Spectral Violet Text Glows**: _Shipped — see `CHANGELOG.md`._
+70. **Monospace Transmission Callouts**: _Shipped — see `CHANGELOG.md`._
 71. **Run-In Quote Attribution**: Poetic whispers set inline with em-dash and decreased letter-spacing.
 72. **Bilingual Glyph Sync**: Seamless font switching between Argentine Spanish diacritics and English glyphs.
 
@@ -111,7 +113,7 @@ numbered ranges below still line up with the original catalog.
 73. **Device Motion / Gyroscope Parallax**: Device orientation API driving `--px` / `--py` tilt on mobile phones when tilted in hand.
 74. **Vibration API Haptic Match Strike**: `navigator.vibrate([30, 50, 100])` delivering tactile match friction directly to mobile hands.
 75. **Ambient Light Sensor Darkening**: Uses Ambient Light Sensor API to darken site contrast when the room lights are dimmed.
-76. **Battery Status Power Conservation**: Disables void grain and reduces canvas FPS automatically when device battery is low.
+76. **Battery Status Power Conservation**: _Shipped — see `CHANGELOG.md`._
 77. **Network Information Audio Scaler**: Falls back to simple sine sweep if `navigator.connection.saveData` is detected.
 78. **Web Share API with Ceremony Card**: Native mobile sharing generating custom ceremony poster metadata.
 79. **Screen Wake Lock during Sound Experience**: Prevents screen sleep while ambient soundscape is playing.
@@ -122,7 +124,7 @@ numbered ranges below still line up with the original catalog.
 84. **Audio Output Device Selection**: Route the ceremony audio to external DJ monitors via `selectAudioOutput()`.
 
 ### VII. Offline, Edge & Void Architecture (85–94)
-85. **Offline Ceremony PWA**: Installable PWA with full offline caching of audio synthesis and tour dates.
+85. **Offline Ceremony PWA**: _Shipped — see `CHANGELOG.md`._
 86. **Speculation Rules API Pre-rendering**: Instantaneous ceremony page loads via background prerender on date hover.
 87. **Zero-Byte Image Placeholders**: SVG inline blur hashes inlining the artist portrait before full resolution loads.
 88. **Static Asset Fingerprint Integrity**: Cryptographic SRI checksums on all SCSS and JS bundles.
@@ -131,7 +133,7 @@ numbered ranges below still line up with the original catalog.
 91. **Fetch Priority Hero Image Boost**: `fetchpriority="high"` on `artist.jpg` ensuring LCP under 400ms globally.
 92. **Local Storage Ceremony Progress**: Saves which ceremony dates the user has inspected, highlighting unvisited rituals.
 93. **GeoIP Ceremony Highlighting**: Client-side timezone detection highlighting the tour date closest to the user's continent.
-94. **Self-Contained Single File Export**: Capability to render the entire site as a single base64-inlined HTML bundle for offline press kits.
+94. **Self-Contained Single File Export**: _Shipped — see `CHANGELOG.md`._
 
 ### VIII. Live Rituals & Real-Time Transmissions (95–101)
 95. **WebSockets Ceremony Sync**: Live synchronized match strike across all visitors simultaneously during scheduled show hours.
