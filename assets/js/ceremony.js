@@ -118,8 +118,22 @@
     }, 1400);
   }
 
+  // Haptic feedback during match strike sequence
+  // Synchronized with friction noise (t=0), sulfur flare (t=0.08s), and 126 BPM sub-kick (t=0.18s)
+  function triggerHapticStrike() {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        // 25ms friction scrape, 140ms flare buildup, 90ms ancestral sub-drop thump
+        navigator.vibrate([25, 140, 90]);
+      } catch (_) {
+        // Graceful no-op if blocked by device policy
+      }
+    }
+  }
+
   function igniteCeremony() {
     triggerVisualStrike();
+    triggerHapticStrike();
     playMatchStrike();
     document.body.classList.add('ceremony-active');
   }

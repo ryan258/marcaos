@@ -101,6 +101,7 @@ h1, h2 {
   text-transform: lowercase;
   letter-spacing: 0.04em;
   color: $text;
+  text-wrap: balance;
 }
 
 h2 {
@@ -110,6 +111,10 @@ h2 {
   letter-spacing: 0.35em;
   color: $rule;
   margin: 0 0 2rem;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 a {
@@ -242,6 +247,7 @@ a {
     font-size: 0.8rem;
     color: $accent;
     margin: 1.5rem 0 0;
+    text-wrap: balance;
   }
 
   .genre { color: $muted; font-size: 0.95rem; margin-top: 0.75rem; }
@@ -328,6 +334,7 @@ body.ceremony-active {
     border-left: 2px solid rgba($accent2, 0.5);
     margin-bottom: 0.5rem;
     transition: border-left-color 0.3s ease;
+    text-wrap: pretty;
 
     &:hover {
       border-left-color: $accent;
@@ -368,6 +375,31 @@ body.ceremony-active {
   list-style: none;
   padding: 0;
   margin: 0;
+  position: relative;
+  view-timeline-name: --timeline-spine;
+  view-timeline-axis: block;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0.5rem;
+    left: 0;
+    bottom: 1.6rem;
+    width: 2px;
+    margin-left: -1px;
+    background: linear-gradient(
+      to bottom,
+      rgba($accent2, 0.4) 0%,
+      $accent 70%,
+      lighten($rule, 25%) 98%,
+      #ffffff 100%
+    );
+    box-shadow: 0 0 10px rgba($accent, 0.9), 0 0 20px rgba($accent2, 0.6);
+    transform-origin: top center;
+    transform: scaleY(0);
+    opacity: 0;
+    pointer-events: none;
+  }
 
   li {
     position: relative;
@@ -504,6 +536,26 @@ footer {
       animation-timeline: view();
       animation-range: entry 0% cover 30%;
     }
+
+    @keyframes timeline-fuse-burn {
+      0% {
+        transform: scaleY(0);
+        opacity: 0;
+      }
+      2% {
+        opacity: 1;
+      }
+      100% {
+        transform: scaleY(1);
+        opacity: 1;
+      }
+    }
+
+    .timeline::after {
+      animation: timeline-fuse-burn linear forwards;
+      animation-timeline: --timeline-spine;
+      animation-range: entry 15% contain 85%;
+    }
   }
 }
 
@@ -541,3 +593,65 @@ footer {
   a:hover { color: $text; }
   a[aria-current="page"] { color: $accent; }
 }
+
+// ── cross-document view transitions ──────────────────────────────
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 0.3s cubic-bezier(0.4, 0, 1, 1) both vt-out;
+}
+
+::view-transition-new(root) {
+  animation: 0.4s cubic-bezier(0, 0, 0.2, 1) both vt-in;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    filter: brightness(0.4) blur(3px);
+    transform: scale(0.985);
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    filter: brightness(1.6) contrast(1.1);
+    transform: scale(1.015);
+  }
+  to {
+    opacity: 1;
+    filter: brightness(1) contrast(1);
+    transform: scale(1);
+  }
+}
+
+// ── scroll-driven document progress needle ───────────────────────
+.scroll-needle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, $accent2 0%, $accent 50%, lighten($rule, 25%) 100%);
+  box-shadow: 0 0 8px rgba($accent, 0.8);
+  transform-origin: left center;
+  transform: scaleX(0);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes needle-progress {
+      to { transform: scaleX(1); }
+    }
+    .scroll-needle {
+      animation: needle-progress linear forwards;
+      animation-timeline: scroll();
+    }
+  }
+}
+

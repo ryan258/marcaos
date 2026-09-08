@@ -106,6 +106,36 @@ lazily on first gesture so autoplay policy is never tripped.
 
 This is the part that makes everything above shippable rather than a demo.
 
+### 11. Cross-Document View Transitions + Speculation Rules
+
+Navigations between the homepage and `/ceremonies/*` execute an in-place darkroom crossfade (`vt-out` / `vt-in`), powered by `@view-transition { navigation: auto; }` and `<script type="speculationrules">` for instant hover prerendering.
+
+- **Where:** `main.scss` (root pseudo-elements) & `head.html`.
+
+### 12. Vibration API — haptic match strike
+
+`navigator.vibrate([25, 140, 90])` synchronizes directly with the Web Audio friction noise (t=0), flare buildup, and 126 BPM sub-kick drop on mobile devices.
+
+- **Where:** `triggerHapticStrike()` in `ceremony.js`.
+
+### 13. Scroll-Driven Timeline Spine Burn & Document Progress Needle
+
+The timeline spine draws down like a burning sulfur fuse via `view-timeline-name: --timeline-spine` and `animation-range: entry 15% contain 85%`. The top `.scroll-needle` tracks overall page scroll via `animation-timeline: scroll()`.
+
+- **Where:** `main.scss` and `baseof.html`.
+
+### 14. Modern Typographic Formatting — `text-wrap: balance / pretty`
+
+`text-wrap: balance` prevents orphaned headings and taglines; `text-wrap: pretty` formats body paragraphs and ceremony quotes.
+
+- **Where:** `main.scss`.
+
+### 15. Hero Image Preload with `fetchpriority="high"`
+
+The background hero image is discovered and fetched before CSS parsing completes, keeping LCP optimal.
+
+- **Where:** `head.html`.
+
 ---
 
 ## Next — worth leaning into
@@ -114,15 +144,12 @@ Ranked by payoff for this site.
 
 | Feature | What it buys us | Notes |
 |---|---|---|
-| **View Transitions API** (cross-document) | Crossfade / morph between the homepage and each `ceremonies/*` page — a "descend into the ceremony" transition | `@view-transition { navigation: auto }` + a bit of CSS. Chrome/Safari 18+ ship it; others no-op to a normal nav. Highest impact, lowest cost. |
 | **`color-mix()` + `:root` custom properties** | Delete the SCSS `rgba()` / `lighten()` derivation boilerplate; expose the 6 brand colors as runtime CSS vars so the theme could even be swapped without a rebuild | Needs the **dart-sass** migration (Hugo `transpiler: "dartsass"`), which also unlocks native CSS nesting and kills the `min()` interpolation hack. See the `ponytail:` note at the top of `main.scss`. |
-| **`animation-timeline: scroll()`** | A scroll-progress "needle" / bar bound to document scroll, distinct from the per-element `view()` timelines already in use | Same support envelope as feature 1. |
-| **`text-wrap: balance` / `pretty`** | Headline and quote line-breaks stop looking accidental | One line each on `h1`, `.tagline`, `.quotes li`. Universal support now, pure enhancement. |
 | **Scroll-state container queries** (`container-type: scroll-state`) | Style the header/hero differently once the page is `stuck` or scrolled past the fold — no JS scroll flag | Chrome 133+. Progressive. |
 | **`backdrop-filter`** | A smoked-glass press/booking panel over the grain | Universal. Cheap. |
-| **Speculation Rules** (`<script type="speculationrules">`) | Prefetch/prerender the ceremony pages on hover so they open instantly — pairs with View Transitions | Chrome only today, ignored elsewhere. |
 | **CSS anchor positioning** | Tether the scroll cue / tooltips to their triggers without wrapper divs | Chrome 125+, Safari in progress. |
 | **Houdini Paint Worklet** | Procedural sigil / grain drawn in a worklet instead of a data-URI SVG | Chrome only. Only if the SVG approach hits a wall — it hasn't. |
+
 
 ### Explicitly *not* doing
 

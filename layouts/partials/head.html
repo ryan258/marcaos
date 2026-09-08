@@ -14,4 +14,26 @@
   {{ $js := . | minify | fingerprint }}
   <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
   {{ end }}
+  {{ if .IsHome }}
+  {{ with .Site.Params.hero.image }}
+  {{ with resources.Get . }}
+  <link rel="preload" as="image" href="{{ .RelPermalink }}" fetchpriority="high">
+  {{ end }}
+  {{ end }}
+  {{ end }}
+  <script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "where": {
+          "and": [
+            { "href_matches": "/*" },
+            { "not": { "href_matches": "/#*" } }
+          ]
+        },
+        "eagerness": "moderate"
+      }
+    ]
+  }
+  </script>
 </head>
