@@ -118,6 +118,110 @@
     }, 1400);
   }
 
+  // ── Shockwave & Camera Shake Impulse (#43 & #7) ─────────────────
+  function triggerShockwave() {
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still) return;
+
+    const wave = document.createElement('div');
+    wave.className = 'kick-shockwave';
+    document.body.appendChild(wave);
+
+    requestAnimationFrame(() => {
+      wave.classList.add('active');
+    });
+
+    setTimeout(() => {
+      if (wave.parentNode) {
+        wave.parentNode.removeChild(wave);
+      }
+    }, 900);
+  }
+
+  function triggerCameraShake() {
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still) return;
+
+    document.body.classList.add('camera-shake');
+    setTimeout(() => {
+      document.body.classList.remove('camera-shake');
+    }, 240);
+  }
+
+  // ── Sub-Bass Drone Anchor (#2) ──────────────────────────────────
+  // Continuous 38Hz binaural sine wave pulsing at 126 BPM, ducking on scroll
+  let droneNodes = null;
+
+  function startSubBassDrone(ctx) {
+    if (droneNodes || !ctx) return;
+
+    const now = ctx.currentTime;
+
+    // Twin binaural sine waves (37.8Hz L, 38.2Hz R) for psychoacoustic pulse
+    const oscL = ctx.createOscillator();
+    const oscR = ctx.createOscillator();
+    oscL.type = 'sine';
+    oscR.type = 'sine';
+    oscL.frequency.setValueAtTime(37.8, now);
+    oscR.frequency.setValueAtTime(38.2, now);
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0.0001, now);
+    // Smoothly swell into the room after the kick landing
+    masterGain.gain.exponentialRampToValueAtTime(0.12, now + 2.4);
+
+    // 126 BPM pulse LFO: 126 / 60 = 2.1 Hz
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    lfo.type = 'sine';
+    lfo.frequency.setValueAtTime(2.1, now);
+    lfoGain.gain.setValueAtTime(0.035, now);
+    lfo.connect(lfoGain);
+    lfoGain.connect(masterGain.gain);
+
+    if (ctx.createStereoPanner) {
+      const pannerL = ctx.createStereoPanner();
+      const pannerR = ctx.createStereoPanner();
+      pannerL.pan.setValueAtTime(-0.65, now);
+      pannerR.pan.setValueAtTime(0.65, now);
+      oscL.connect(pannerL);
+      oscR.connect(pannerR);
+      pannerL.connect(masterGain);
+      pannerR.connect(masterGain);
+    } else {
+      oscL.connect(masterGain);
+      oscR.connect(masterGain);
+    }
+
+    masterGain.connect(ctx.destination);
+
+    oscL.start(now);
+    oscR.start(now);
+    lfo.start(now);
+
+    droneNodes = { oscL, oscR, lfo, masterGain };
+
+    // Auto-ducking based on page scroll depth
+    const onScroll = () => {
+      if (!droneNodes || !audioCtx) return;
+      const scrollY = window.scrollY || window.pageYOffset;
+      const maxScroll = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+      const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
+      // Ducks down as user descends deep into press / tour content
+      const targetGain = Math.max(0.015, 0.12 * (1 - progress * 0.8));
+      droneNodes.masterGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.2);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Duck when backgrounded
+    document.addEventListener('visibilitychange', () => {
+      if (!droneNodes || !audioCtx) return;
+      const targetGain = document.hidden ? 0.0001 : 0.12;
+      droneNodes.masterGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.3);
+    });
+  }
+
   // Haptic feedback during match strike sequence
   // Synchronized with friction noise (t=0), sulfur flare (t=0.08s), and 126 BPM sub-kick (t=0.18s)
   function triggerHapticStrike() {
@@ -132,40 +236,131 @@
   }
 
   function igniteCeremony() {
+    const ctx = getAudioContext();
     triggerVisualStrike();
     triggerHapticStrike();
     playMatchStrike();
     document.body.classList.add('ceremony-active');
+
+    // Kick drop shockwave, camera shake impulse, and ambient sub-drone at t=180ms
+    setTimeout(() => {
+      triggerShockwave();
+      triggerCameraShake();
+      if (ctx) {
+        startSubBassDrone(ctx);
+      }
+    }, 180);
   }
 
-  // Pointer parallax — feed --px/--py to the hero so the title and
-  // sigil drift toward a fine pointer. CSS does the actual transform;
-  // this only reports normalized cursor position (-1..1).
+  // ── Alchemical / Cipher Coordinate Decryption on Hover (#48) ────
+  function bindCipherDecryption() {
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still) return;
+
+    const glyphs = '🜂🜏☿🜃🜄☉☽12608';
+    const targets = document.querySelectorAll('.dates .v, [data-cipher]');
+
+    targets.forEach((el) => {
+      const originalText = el.textContent.trim();
+      if (!originalText) return;
+
+      let timer = null;
+      const parentRow = el.closest('li') || el;
+
+      parentRow.addEventListener('pointerenter', () => {
+        let iteration = 0;
+        clearInterval(timer);
+
+        timer = setInterval(() => {
+          el.textContent = originalText
+            .split('')
+            .map((char, index) => {
+              if (char === ' ' || char === '·' || char === ',') return char;
+              if (index < iteration) {
+                return originalText[index];
+              }
+              return glyphs[Math.floor(Math.random() * glyphs.length)];
+            })
+            .join('');
+
+          iteration += 1 / 2;
+          if (iteration >= originalText.length) {
+            clearInterval(timer);
+            el.textContent = originalText;
+          }
+        }, 32);
+      });
+
+      parentRow.addEventListener('pointerleave', () => {
+        clearInterval(timer);
+        el.textContent = originalText;
+      });
+    });
+  }
+
+  // ── Secret Keystroke Ritual: D-R-O-P (#55) ──────────────────────
+  function bindKeystrokeRitual() {
+    const target = 'drop';
+    let buffer = '';
+
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (e.key.length !== 1) return;
+
+      buffer += e.key.toLowerCase();
+      if (buffer.length > 8) buffer = buffer.slice(-8);
+
+      if (buffer.endsWith(target)) {
+        buffer = '';
+        igniteCeremony();
+      }
+    });
+  }
+
+  // Parallax — feed --px/--py to the hero so the title and
+  // sigil drift toward a fine pointer or tilt on mobile gyroscope.
+  // CSS does the actual transform; this only reports normalized coordinates (-0.5..0.5).
   function bindHeroParallax() {
     const hero = document.querySelector('.hero');
     if (!hero) return;
 
     const fine = window.matchMedia('(pointer: fine)').matches;
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!fine || still) return;
+    if (still) return;
 
     let raf = 0;
-    hero.addEventListener('pointermove', (e) => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        const r = hero.getBoundingClientRect();
-        hero.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
-        hero.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+
+    if (fine) {
+      // Desktop fine cursor parallax
+      hero.addEventListener('pointermove', (e) => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          const r = hero.getBoundingClientRect();
+          hero.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+          hero.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+        });
       });
-    });
-    hero.addEventListener('pointerleave', () => {
-      hero.style.setProperty('--px', '0');
-      hero.style.setProperty('--py', '0');
-    });
+      hero.addEventListener('pointerleave', () => {
+        hero.style.setProperty('--px', '0');
+        hero.style.setProperty('--py', '0');
+      });
+    } else if (typeof window.DeviceOrientationEvent !== 'undefined') {
+      // Mobile DeviceOrientation / Gyroscope Parallax (#73)
+      window.addEventListener('deviceorientation', (e) => {
+        if (raf || e.gamma === null || e.beta === null) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          const px = Math.min(0.5, Math.max(-0.5, e.gamma / 90));
+          const py = Math.min(0.5, Math.max(-0.5, (e.beta - 45) / 50));
+          hero.style.setProperty('--px', px.toFixed(3));
+          hero.style.setProperty('--py', py.toFixed(3));
+        });
+      }, { passive: true });
+    }
   }
 
-  // Bind igniter triggers
+  // Bind igniter triggers & ritual listeners
   document.addEventListener('DOMContentLoaded', () => {
     const strikeTriggers = document.querySelectorAll('[data-action="strike-match"]');
     strikeTriggers.forEach((btn) => {
@@ -175,5 +370,8 @@
       });
     });
     bindHeroParallax();
+    bindCipherDecryption();
+    bindKeystrokeRitual();
   });
 })();
+

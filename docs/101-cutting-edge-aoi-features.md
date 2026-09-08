@@ -136,6 +136,60 @@ The background hero image is discovered and fetched before CSS parsing completes
 
 - **Where:** `head.html`.
 
+### 16. Sub-Bass Drone Anchor — 38Hz Binaural Sine Wave
+
+Continuous twin 38Hz sine waves (37.8Hz L, 38.2Hz R) pulsing with a 126 BPM (2.1Hz) LFO that fades into the room after ceremony ignition, ducking dynamically as the user scrolls down into content sections and muting when the tab is backgrounded.
+
+- **Where:** `startSubBassDrone()` in `ceremony.js`.
+
+### 17. Sub-Kick Shockwave & Camera Shake Impulse
+
+Timed to the exact millisecond of the ancestral drop (t=180ms), a momentary CSS stage-shake and expanding 36x blurred ring ripple outward across the hero stage.
+
+- **Where:** `main.scss` (`.kick-shockwave`, `body.camera-shake`) & `ceremony.js`.
+
+### 18. Alchemical / Cipher Coordinate Decryption on Hover
+
+Hovering over ceremony tour dates causes venue text to cycle through occult alchemical glyphs before resolving character-by-character into plaintext, with fixed-width monospace formatting preventing layout shift.
+
+- **Where:** `bindCipherDecryption()` in `ceremony.js` & `main.scss`.
+
+### 19. Secret Keystroke Ritual: D-R-O-P
+
+Typing `d-r-o-p` anywhere on the site initiates the blackout flash, sub-kick shockwave, and match strike sequence without clicking.
+
+- **Where:** `bindKeystrokeRitual()` in `ceremony.js`.
+
+### 20. Runtime `:root` CSS Custom Properties & `color-mix()`
+
+Brand tokens (`--bg`, `--text`, `--muted`, `--accent`, `--accent2`, `--rule`) exposed on `:root` with native `color-mix(in srgb, ...)` alpha derivations in supported engines.
+
+- **Where:** `main.scss`.
+
+### 21. Smoked-Glass Panels via `backdrop-filter`
+
+`.press-block` and `.langs` navigation float over the procedural SVG void noise with `backdrop-filter: blur(12px) brightness(...)`, yielding an authentic dark progressive aesthetic.
+
+- **Where:** `main.scss` (`.press-block`, `.langs`).
+
+### 22. Scroll-State Container Queries (`container-type: scroll-state`)
+
+The `.langs` pill adapts its background, border, and elevation dynamically via `@container scroll-state(stuck: top)` without binding a single scroll listener in JavaScript.
+
+- **Where:** `main.scss`.
+
+### 23. CSS Anchor Positioning
+
+The hero scroll cue tethered directly to the match striker button via `anchor-name: --ceremony-trigger` and `position-anchor: --ceremony-trigger`, maintaining precise spatial hierarchy without wrapper elements.
+
+- **Where:** `main.scss` (`.scrollcue`, `.ceremony-trigger`).
+
+### 24. Mobile Gyroscope / DeviceOrientation Parallax (#73)
+
+Mobile users experience the same responsive 3D perspective shift as desktop cursors: handheld device tilt (gamma/beta) drives the `--px` and `--py` stage properties via rAF-throttled `deviceorientation`.
+
+- **Where:** `bindHeroParallax()` in `ceremony.js` & `main.scss`.
+
 ---
 
 ## Next — worth leaning into
@@ -144,11 +198,12 @@ Ranked by payoff for this site.
 
 | Feature | What it buys us | Notes |
 |---|---|---|
-| **`color-mix()` + `:root` custom properties** | Delete the SCSS `rgba()` / `lighten()` derivation boilerplate; expose the 6 brand colors as runtime CSS vars so the theme could even be swapped without a rebuild | Needs the **dart-sass** migration (Hugo `transpiler: "dartsass"`), which also unlocks native CSS nesting and kills the `min()` interpolation hack. See the `ponytail:` note at the top of `main.scss`. |
-| **Scroll-state container queries** (`container-type: scroll-state`) | Style the header/hero differently once the page is `stuck` or scrolled past the fold — no JS scroll flag | Chrome 133+. Progressive. |
-| **`backdrop-filter`** | A smoked-glass press/booking panel over the grain | Universal. Cheap. |
-| **CSS anchor positioning** | Tether the scroll cue / tooltips to their triggers without wrapper divs | Chrome 125+, Safari in progress. |
-| **Houdini Paint Worklet** | Procedural sigil / grain drawn in a worklet instead of a data-URI SVG | Chrome only. Only if the SVG approach hits a wall — it hasn't. |
+| **Buenos Aires Blackout Clock (#51)** | Live status indicator displaying whether Buenos Aires (UTC-3) is currently under night or daylight, shifting site atmosphere | Zero-dependency client-side `Intl.DateTimeFormat` or UTC calculation |
+| **Procedural Tape Hiss & Wow/Flutter (#1)** | Subtly modulated pitch-shifted noise emulating an old cassette found in Parque Centenario | Web Audio buffer source + LFO pitch modulator |
+| **Sulfur Spark Physics (#21)** | Lightweight canvas particle burst radiating 12 golden-red sparks on match strike with gravity and drag | Canvas overlay triggered at friction strike instant |
+| **Offline Ceremony PWA (#85)** | Installable PWA with full offline caching of procedural audio synthesis and tour dates | Service worker + web manifest |
+| **Self-Contained Single-File EPK Export (#94)** | Inline HTML bundle with embedded base64 assets for press and bookings | Automated build artifact generation |
+
 
 
 ### Explicitly *not* doing
