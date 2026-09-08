@@ -523,3 +523,21 @@ footer {
   .dates .t { grid-column: 1; }
   .dates .t { grid-row: auto; justify-self: start; }
 }
+
+// ── language switcher ───────────────────────────────────────────
+.langs {
+  position: fixed;
+  top: 0.9rem;
+  right: 1rem;
+  z-index: 101;
+  display: flex;
+  gap: 0.75rem;
+  font-family: $mono;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: lowercase;
+
+  a { color: $muted; text-decoration: none; }
+  a:hover { color: $text; }
+  a[aria-current="page"] { color: $accent; }
+}

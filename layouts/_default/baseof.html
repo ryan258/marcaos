@@ -1,9 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ .Language.Lang }}">
 {{ partial "head.html" . }}
 <body>
   <div class="void-overlay" aria-hidden="true"></div>
   <div class="blackout-vignette" aria-hidden="true"></div>
+  {{ if gt (len .AllTranslations) 1 }}
+  <nav class="langs" aria-label="language">
+    {{ range .AllTranslations }}
+    <a href="{{ .RelPermalink }}" hreflang="{{ .Language.Lang }}"{{ if eq .Language.Lang $.Language.Lang }} aria-current="page"{{ end }}>{{ .Language.Label }}</a>
+    {{ end }}
+  </nav>
+  {{ end }}
   <main>
     {{ block "main" . }}{{ end }}
   </main>

@@ -8,9 +8,9 @@
     <h1>{{ .name }}</h1>
     {{ with .tagline }}<p class="tagline">{{ . }}</p>{{ end }}
     {{ with .genre }}<p class="genre">{{ . }}</p>{{ end }}
-    <button class="ceremony-trigger" data-action="strike-match" type="button" aria-label="Strike match and ignite ceremony">
+    <button class="ceremony-trigger" data-action="strike-match" type="button" aria-label="{{ i18n "strike_match_aria" }}">
       <span class="match-icon">🜂</span>
-      <span>strike the match · ignite the drop</span>
+      <span>{{ i18n "strike_match" }}</span>
     </button>
   </div>
   {{ with .cue }}<p class="scrollcue">{{ . }}</p>{{ end }}

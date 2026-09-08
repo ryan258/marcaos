@@ -4,6 +4,9 @@
   {{ $name := .Site.Params.hero.name | default .Site.Title }}
   <title>{{ if .IsHome }}{{ $name }}{{ with .Site.Params.hero.tagline }} — {{ . }}{{ end }}{{ else }}{{ .Title }} · {{ $name }}{{ end }}</title>
   <meta name="description" content="{{ $name }}{{ with .Site.Params.hero.tagline }} — {{ . }}{{ end }}">
+  {{ range .AllTranslations }}
+  <link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
+  {{ end }}
   {{ $opts := dict "transpiler" "libsass" "targetPath" "css/main.css" "outputStyle" "compressed" }}
   {{ $css := resources.Get "scss/main.scss" | toCSS $opts | fingerprint }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">

@@ -3,6 +3,6 @@
   <h2>{{ .Title }}</h2>
   {{ with .Content }}{{ . }}{{ end }}
   {{ partial "ceremony-list.html" . }}
-  <p><a href="{{ site.Home.RelPermalink }}">← return to the drop</a></p>
+  <p><a href="{{ site.Home.RelPermalink }}">{{ i18n "back_to_drop" }}</a></p>
 </section>
 {{ end }}
