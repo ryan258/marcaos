@@ -7,6 +7,18 @@ this project is a rolling static site and is not versioned.
 
 ### Added
 
+- **Full Section III: Spatial Depth, Parallax & Compositor Motion** (`docs/101-cutting-edge-aoi-features.md` §31–45):
+  - Multi-Plane 3D Stage — 5 distinct z-index planes (`translateZ(-200px)` to `translateZ(100px)`) shifting with pointer tilt (#31)
+  - Scroll-Driven Timeline Spine Burn — glowing molten red fuse drawn progressively via `animation-timeline: scroll(root)` (#33)
+  - View-Timeline Staggered Quote Reveal — individual quote lines fade in with progressive delay keyed to scrollport entry percentages (#36)
+  - Sticky Ritual Altar — central talisman icon (`🜂`) pinned to screen center with quotes rotating in 3D carousel space (#37)
+  - Scroll-Linked Bandoneón Bellows — page margin accordion compression as user enters ceremony dates (#38)
+  - View Transitions Page Descent — full-page crossfade with momentary blur drop simulating stepping through a trapdoor into the venue (#39)
+  - Gypsy Frequency Waveform Rail — left margin waveform path that deforms and spikes as user scrolls past sound quotes (#40)
+  - Inverse Parallax Fog — foreground smoke drifting in reverse scroll direction via `animation-timeline: scroll()` (#41)
+  - Anchor-Positioned Whispers — poetic fragments anchored to hover targets using native CSS `anchor()` (#42)
+  - Scroll-State Sticky Booking Bar — mini booking bar docking to screen edge using `container-type: scroll-state` without scroll event listeners (#44)
+  - Text-Wrap Balance & Pretty — balanced headline typography and pretty body text preventing orphaned words across mobile breakpoints (#45)
 - **10 platform-native features** (`docs/101-cutting-edge-aoi-features.md`
   §2, §3, §7, §43, §47, §48, §52, §55, §73, §74):
   - Bandoneón texture filter — periodic harmonic notch/comb filter shaping

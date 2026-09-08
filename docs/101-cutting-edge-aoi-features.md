@@ -63,21 +63,21 @@ All shipped — see `CHANGELOG.md` (§16–30). Kept the section heading so the
 numbered ranges below still line up with the original catalog.
 
 ### III. Spatial Depth, Parallax & Compositor Motion (31–45)
-31. **Multi-Plane 3D Stage**: 5 distinct z-index planes (`translateZ(-200px)` to `translateZ(100px)`) shifting with pointer tilt.
+31. **Multi-Plane 3D Stage**: _Shipped — see `CHANGELOG.md`._
 32. **Scroll-Velocity Tilt**: _Shipped — see `CHANGELOG.md`._
-33. **Scroll-Driven Timeline Spine Burn**: The red timeline border uses `animation-timeline: scroll()` to draw itself down the page like a burning fuse.
+33. **Scroll-Driven Timeline Spine Burn**: _Shipped — see `CHANGELOG.md`._
 34. **Receding Void Hero**: _Shipped — see `CHANGELOG.md`._
 35. **Ceremony Floating Date Cards**: _Shipped — see `CHANGELOG.md`._
-36. **View-Timeline Staggered Quote Reveal**: Individual quote lines fade in with progressive delay keyed to scrollport entry percentages.
-37. **Sticky Ritual Altar**: Central talisman icon pins to screen center while quotes rotate around it in 3D carousel space.
-38. **Scroll-Linked Bandoneón Bellows**: Page margin accordion compression as user reaches the ceremony dates section.
-39. **View Transitions Page Descent**: Full-page crossfade with a momentary blur drop simulating stepping through a trapdoor into the venue.
-40. **Gypsy Frequency Waveform Rail**: Left margin waveform path that deforms and spikes as the user scrolls past sound quotes.
-41. **Inverse Parallax Fog**: Foreground smoke drifting in reverse scroll direction to maximize perceived stage depth.
-42. **Anchor-Positioned Whispers**: Footnotes and poetic fragments anchored to hover targets using native CSS `anchor()`.
+36. **View-Timeline Staggered Quote Reveal**: _Shipped — see `CHANGELOG.md`._
+37. **Sticky Ritual Altar**: _Shipped — see `CHANGELOG.md`._
+38. **Scroll-Linked Bandoneón Bellows**: _Shipped — see `CHANGELOG.md`._
+39. **View Transitions Page Descent**: _Shipped — see `CHANGELOG.md`._
+40. **Gypsy Frequency Waveform Rail**: _Shipped — see `CHANGELOG.md`._
+41. **Inverse Parallax Fog**: _Shipped — see `CHANGELOG.md`._
+42. **Anchor-Positioned Whispers**: _Shipped — see `CHANGELOG.md`._
 43. **Camera Shake Impulse**: _Shipped — see `CHANGELOG.md`._
-44. **Scroll-State Sticky Booking Bar**: Mini booking bar that docks to screen edge using `container-type: scroll-state` without scroll event listeners.
-45. **Text-Wrap Balance & Pretty**: Balanced headline typography preventing orphaned words across mobile breakpoints.
+44. **Scroll-State Sticky Booking Bar**: _Shipped — see `CHANGELOG.md`._
+45. **Text-Wrap Balance & Pretty**: _Shipped — see `CHANGELOG.md`._
 
 ### IV. Ceremony, Ritual & Mystery Mechanics (46–60)
 46. **The Blackout Countdown**: Dynamic ceremony countdown timer counting down in days, hours, and beats (126 BPM clock).
