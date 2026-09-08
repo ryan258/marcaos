@@ -4,57 +4,80 @@
 #  Ships with the "Marchaos" demo brand so it runs out of the box and
 #  shows what goes where. Replace every value below with your own.
 #
+#  BILINGUAL: the default language is lunfardo castellano (es-AR); the
+#  [languages.en] block near the bottom overrides the prose with american
+#  english. Scalar params fall through to a language if it doesn't set
+#  them; ARRAYS (quotes.lines, timeline.entries, footer.lines, listen
+#  .links) do NOT merge — re-list the whole array for each language.
+#  Content: one Markdown file per language, e.g. berlin.es.md / berlin.en.md.
+#
 #  - Optional sections (listen, timeline, shows) disappear when their
 #    entries are removed. Delete the whole block to hide a section.
 #  - Prose fields accept Markdown (links, *emphasis*).
 #  - Colors live in one block at the top of assets/scss/main.scss.
+#  - Fixed UI strings (buttons, "tickets", 404) live in i18n/*.toml.
 #
 #  Requires Hugo extended.  `hugo server` to preview.
 # ─────────────────────────────────────────────────────────────────────
 
 baseURL = "https://www.thedropwasforetold.world/"
-title = "Marchaos"
+title = "Marchaos"   # en spelling; es overrides to "Marcaos" below
 enableEmoji = false
 buildFuture = true   # future-dated ceremonies are upcoming shows, not drafts
 disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
 
+defaultContentLanguage = "es"          # lunfardo castellano is the default
+defaultContentLanguageInSubdir = false  # es at /, en at /en/
+
+[languages.es]
+title = "Marcaos"
+label = "lunfardo castellano"
+locale = "es_AR"
+weight = 1
+
 [languages.en]
-locale = "en-us"
+label = "american english"
+locale = "en_US"
+weight = 2
 
 [markup.goldmark.renderer]
 unsafe = true   # allow inline HTML in Markdown prose fields
 
+# ═════════════════════════════════════════════════════════════════════
+#  DEFAULT LANGUAGE — lunfardo castellano
+# ═════════════════════════════════════════════════════════════════════
+
 # ── hero ─────────────────────────────────────────────────────────────
 [params.hero]
-name    = "Marchaos"
-tagline = "the drop was foretold."
-genre   = "dark progressive house · ancestral + mystic undertones"
-cue     = "the crowd doesn't dance. they receive."
-image   = "artist.jpg"   # a file inside assets/
+name    = "Marcaos"
+tagline = "el drop estaba escrito."
+genre   = "dark progressive house · fondo ancestral y místico"
+cue     = "la gente no baila. recibe."
+image   = "artist.jpg"   # a file inside assets/ — shared by both languages
 
 # ── about / bio ──────────────────────────────────────────────────────
 [params.about]
-heading = "the vessel"
+heading = "el vaso"
 body = """
-they called him gypsy his whole life. a fortune teller in buenos aires told
-him he would become the international dj of the gypsy frequency. not long
-after, fate aligned. a name emerged. a set was played. a soul split.
+toda la vida le dijeron gitano. una adivina en buenos aires le tiró que iba
+a ser el dj internacional de la frecuencia gitana. al toque, el destino se
+acomodó. apareció un nombre. se tiró un set. un alma se partió al medio.
 """
-whisper = "marcos remained behind. marchaos walked forward."
+whisper = "marcos se quedó atrás. marcaos siguió de largo."
 
 # ── press quotes ─────────────────────────────────────────────────────
 [params.quotes]
-heading = "the sound"
-texture = "deep sub-bass · 124–128 bpm · filtered bandoneon · wind textures · match strikes · reversed spanish · tape hiss · minor-key refrains"
+heading = "el sonido"
+texture = "sub-graves profundos · 124–128 bpm · bandoneón filtrado · texturas de viento · fósforos que se prenden · castellano al revés · ruido de cinta · estribillos en tono menor"
 lines = [
-  '"like the moment before a storm became a nightclub."',
-  "\"if borges dj'd in berlin with ghost samples and a broken heart.\"",
-  '"basslines deep enough to bury secrets in."',
+  '"como el momento antes de la tormenta, pero hecho boliche."',
+  '"si borges pinchara en berlín con samples fantasma y el corazón roto."',
+  '"bajos tan hondos que podés enterrar secretos adentro."',
 ]
 
 # ── listen (optional) ────────────────────────────────────────────────
 [params.listen]
-heading = "listen"
+heading = "escuchá"
 [[params.listen.links]]
 name = "Spotify"
 url  = "#"
@@ -67,40 +90,41 @@ url  = "#"
 
 # ── timeline (optional) ──────────────────────────────────────────────
 [params.timeline]
-heading = "prophecy timeline"
+heading = "línea de tiempo de la profecía"
 [[params.timeline.entries]]
-label = "before"
-text  = 'tía warned he "walked with tempo."'
+label = "antes"
+text  = 'la tía avisaba que "caminaba con tempo."'
 [[params.timeline.entries]]
-label = "before"
-text  = 'abuelita: "cuando bailás, escuchás cosas que no están allí."'
+label = "antes"
+text  = 'la abuelita: "cuando bailás, escuchás cosas que no están ahí."'
 [[params.timeline.entries]]
-label = "the fog"
-text  = "disappeared for 3 days in parque centenario. returned changed."
+label = "la niebla"
+text  = "se esfumó 3 días en parque centenario. volvió cambiado."
 [[params.timeline.entries]]
-label = "the reading"
-text  = "the fortune teller names the gypsy frequency."
+label = "la tirada"
+text  = "la adivina le pone nombre a la frecuencia gitana."
 [[params.timeline.entries]]
-label = "the split"
-text  = "a set was played. marchaos walked forward."
+label = "la partida"
+text  = "se tiró un set. marcaos siguió de largo."
 [[params.timeline.entries]]
 label = "2K25"
-text  = "first album *Gypsy Nights*. world tour *The Drop Was Foretold*."
+text  = "primer disco *Gypsy Nights*. gira mundial *The Drop Was Foretold*."
 
 # ── shows (optional) ─────────────────────────────────────────────────
-# One Markdown file per show in content/ceremonies/ (see the samples).
-# `hugo new ceremonies/paris.md` scaffolds one. Delete them all to hide
+# One Markdown file per show per language in content/ceremonies/, e.g.
+# paris.es.md / paris.en.md (see the samples). Delete them all to hide
 # the section. This block only sets the heading.
 [params.shows]
-heading = "ceremonies"
+heading = "ceremonias"
 
 # ── press / booking ──────────────────────────────────────────────────
 [params.press]
-heading = "press · booking"
-body    = "epk: bio, visuals, prophecy timeline. set opens with darkness, a match strike, then kick."
+heading = "prensa · contrataciones"
+body    = "epk: bio, visuales, línea de tiempo de la profecía. el set arranca a oscuras, un fósforo que se prende, y después el bombo."
 email   = "ceremonies@thedropwasforetold.world"
-whisper = "thank you for trusting the drop."
+whisper = "gracias por confiar en el drop."
 
+# ── social (shared by both languages) ────────────────────────────────
 [[params.social]]
 name = "@marchaos.wav"
 url  = "https://instagram.com/marchaos.wav"
@@ -110,7 +134,74 @@ url  = "https://soundcloud.com/Marchaos"
 
 # ── footer ───────────────────────────────────────────────────────────
 [[params.footer.lines]]
-text = "marchaos is not a brand. he is a signal."
+text = "marcaos no es una marca. es una señal."
 [[params.footer.lines]]
+text = "marcos soñaba con la luz. marcaos se quedó en las sombras."
+dim  = true
+
+# ═════════════════════════════════════════════════════════════════════
+#  american english — overrides the prose above. Only text differs;
+#  hero.image, press.email and social fall through from the default.
+# ═════════════════════════════════════════════════════════════════════
+
+[languages.en.params.hero]
+name    = "Marchaos"
+tagline = "the drop was foretold."
+genre   = "dark progressive house · ancestral + mystic undertones"
+cue     = "the crowd doesn't dance. they receive."
+
+[languages.en.params.about]
+heading = "the vessel"
+body = """
+they called him gypsy his whole life. a fortune teller in buenos aires told
+him he would become the international dj of the gypsy frequency. not long
+after, fate aligned. a name emerged. a set was played. a soul split.
+"""
+whisper = "marcos remained behind. marchaos walked forward."
+
+[languages.en.params.quotes]
+heading = "the sound"
+texture = "deep sub-bass · 124–128 bpm · filtered bandoneon · wind textures · match strikes · reversed spanish · tape hiss · minor-key refrains"
+lines = [
+  '"like the moment before a storm became a nightclub."',
+  "\"if borges dj'd in berlin with ghost samples and a broken heart.\"",
+  '"basslines deep enough to bury secrets in."',
+]
+
+[languages.en.params.listen]
+heading = "listen"
+
+[languages.en.params.timeline]
+heading = "prophecy timeline"
+[[languages.en.params.timeline.entries]]
+label = "before"
+text  = 'tía warned he "walked with tempo."'
+[[languages.en.params.timeline.entries]]
+label = "before"
+text  = 'abuelita: "cuando bailás, escuchás cosas que no están allí."'
+[[languages.en.params.timeline.entries]]
+label = "the fog"
+text  = "disappeared for 3 days in parque centenario. returned changed."
+[[languages.en.params.timeline.entries]]
+label = "the reading"
+text  = "the fortune teller names the gypsy frequency."
+[[languages.en.params.timeline.entries]]
+label = "the split"
+text  = "a set was played. marchaos walked forward."
+[[languages.en.params.timeline.entries]]
+label = "2K25"
+text  = "first album *Gypsy Nights*. world tour *The Drop Was Foretold*."
+
+[languages.en.params.shows]
+heading = "ceremonies"
+
+[languages.en.params.press]
+heading = "press · booking"
+body    = "epk: bio, visuals, prophecy timeline. set opens with darkness, a match strike, then kick."
+whisper = "thank you for trusting the drop."
+
+[[languages.en.params.footer.lines]]
+text = "marchaos is not a brand. he is a signal."
+[[languages.en.params.footer.lines]]
 text = "marcos dreamed of light. marchaos stayed for the shadows."
 dim  = true

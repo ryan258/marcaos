@@ -1,0 +1,8 @@
+# fixed UI strings — american english
+strike_match      = "strike the match · ignite the drop"
+strike_match_aria = "Strike match and ignite ceremony"
+tickets           = "tickets"
+all_ceremonies    = "← all ceremonies"
+return_to_drop    = "return to the drop"
+back_to_drop      = "← return to the drop"
+lost_signal       = "lost the signal"

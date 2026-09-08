@@ -1,0 +1,8 @@
+# fixed UI strings — lunfardo castellano
+strike_match      = "prendé el fósforo · encendé el drop"
+strike_match_aria = "prender el fósforo y arrancar la ceremonia"
+tickets           = "entradas"
+all_ceremonies    = "← todas las ceremonias"
+return_to_drop    = "volvé al drop"
+back_to_drop      = "← volvé al drop"
+lost_signal       = "se cortó la señal"
