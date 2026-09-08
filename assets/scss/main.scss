@@ -2099,3 +2099,232 @@ body.ceremony-active .dates[data-match-gated="true"] {
   }
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+//  FX CONTROL PANEL — the feature playground
+//  Ids below mirror the FX registry at the top of assets/js/ceremony.js.
+//  JS puts `off-<id>` on <html>; everything visual switches off here.
+//  ponytail: hand-kept map. If it ever drifts, emit it from the JS array
+//  at build time instead of syncing two lists.
+// ═══════════════════════════════════════════════════════════════════
+
+$fx-hide: (
+  void:          ".void-overlay",
+  vignette:      ".blackout-vignette",
+  grid:          ".alley-grid",
+  fog:           ".fog, .fog-inverse",
+  halo:          ".halo",
+  needle:        ".scroll-needle",
+  rail:          ".waveform-rail",
+  smoke:         "canvas.smoke",
+  bleed:         ".light-bleed",
+  sigil:         ".hero-sigil",
+  constellation: ".hero-plane-void",
+  embers:        ".hero-plane-fore",
+  eclipse:       ".hero::after",
+  altar:         ".ritual-altar",
+  bellows:       ".bellows-fold",
+  badges:        ".alch-badge",
+  whispers:      ".whisper-anchors",
+  booking:       ".booking-bar-wrapper",
+  tarot:         ".tarot-block",
+  countdown:     ".countdown",
+  clock:         ".ba-clock",
+  soul:          ".soul-toggle",
+);
+
+@each $id, $sel in $fx-hide {
+  html.off-#{$id} {
+    #{$sel} { display: none !important; }
+  }
+}
+
+// Effects that switch off by neutralising a value rather than hiding a node
+html.off-parallax  { --px: 0; --py: 0; }
+html.off-scrollvel { --scroll-vel: 0; --scroll-dir-vel: 0; }
+html.off-cards .dates li,
+html.off-cards .timeline li { --card-rx: 0; --card-ry: 0; }
+html.off-recede .hero-inner { animation: none !important; }
+html.off-daguerre .void-overlay { filter: #{"opacity(var(--fx-grain, 1))"} !important; }
+
+// Gate off ⇒ tickets simply stand open
+html.off-gate .dates[data-match-gated="true"] .match-gate {
+  .ticket-link {
+    opacity: 1;
+    filter: none;
+    pointer-events: auto;
+    user-select: auto;
+  }
+  .gate-lock { display: none; }
+}
+
+// grain slider — filter() composes with the existing opacity keyframes,
+// so animated layers keep animating while the slider scales them.
+// ponytail: libsass rewrites unescaped filter: opacity() to legacy IE alpha().
+.void-overlay,
+.blackout-vignette,
+.alley-grid,
+.fog,
+.fog-inverse {
+  filter: #{"opacity(var(--fx-grain, 1))"};
+}
+
+// motion slider at 0 is a hard stop, mirroring the prefers-reduced-motion
+// block above. ponytail: four duplicated lines beat refactoring 2k of SCSS.
+html.fx-still {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .kick-shockwave { display: none !important; }
+}
+
+// ── the affordance ──────────────────────────────────────────────────
+.fx-open {
+  background: transparent;
+  border: 1px solid rgba($rule, 0.35);
+  color: $muted;
+  font-family: $mono;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease;
+  &:hover,
+  &:focus-visible {
+    color: $accent;
+    border-color: rgba($accent, 0.6);
+  }
+}
+
+// ── the panel ───────────────────────────────────────────────────────
+.fx-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 200;
+  width: #{"min(21rem, 92vw)"};
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: 1rem 1.1rem 2rem;
+  font-family: $mono;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: $text;
+  background: rgba($bg, 0.93);
+  border-left: 1px solid rgba($rule, 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transform: translateX(101%);
+  visibility: hidden;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+  overscroll-behavior: contain;
+
+  &.open {
+    transform: none;
+    visibility: visible;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    letter-spacing: 0.2em;
+    text-transform: lowercase;
+    color: $accent;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba($rule, 0.25);
+  }
+
+  .fx-close {
+    background: none;
+    border: 0;
+    color: $muted;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.2rem;
+    &:hover { color: $accent; }
+  }
+
+  .fx-slider {
+    display: grid;
+    grid-template-columns: 4.2rem 1fr 2.4rem;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.7rem 0;
+    color: $muted;
+    b {
+      font-weight: 400;
+      text-align: right;
+      color: $rule;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: $accent;
+    }
+  }
+
+  fieldset {
+    border: 0;
+    border-top: 1px solid rgba($rule, 0.2);
+    margin: 0.9rem 0 0;
+    padding: 0.6rem 0 0;
+    display: grid;
+    gap: 0.28rem;
+  }
+
+  legend {
+    color: $rule;
+    letter-spacing: 0.22em;
+    text-transform: lowercase;
+    padding: 0 0.4rem 0 0;
+  }
+
+  fieldset label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: $muted;
+    &:hover { color: $text; }
+  }
+
+  input[type="checkbox"] {
+    accent-color: $accent;
+    flex: none;
+  }
+
+  footer {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.1rem;
+    button {
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba($rule, 0.35);
+      color: $muted;
+      font-family: $mono;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      padding: 0.35rem;
+      border-radius: 2px;
+      cursor: pointer;
+      &:hover { color: $accent; border-color: rgba($accent, 0.6); }
+    }
+  }
+
+  .fx-note {
+    margin-top: 0.9rem;
+    color: rgba($muted, 0.75);
+    font-size: 0.65rem;
+    line-height: 1.45;
+  }
+}
+
+@media (max-width: 480px) {
+  .fx-panel { width: 100vw; }
+}

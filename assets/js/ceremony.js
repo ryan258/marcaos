@@ -4,6 +4,278 @@
 (function () {
   'use strict';
 
+  // ═══════════════════════════════════════════════════════════════════
+  //  FX REGISTRY & CONTROL PANEL — the playground
+  //  One row per effect: [group, id, label]. The panel UI, the persisted
+  //  state and the `off-<id>` classes on <html> all derive from this.
+  //  ponytail: SCSS mirrors these ids in the $fx-hide map at the bottom
+  //  of main.scss. A purely visual effect = one row here + one map entry
+  //  there; nothing else to wire. Ids are matched by hand across the two
+  //  files — if that ever drifts, generate the map from this array.
+  // ═══════════════════════════════════════════════════════════════════
+  const FX = [
+    ['layers', 'void', 'void grain'],
+    ['layers', 'vignette', 'blackout vignette'],
+    ['layers', 'grid', 'alley grid'],
+    ['layers', 'fog', 'fog'],
+    ['layers', 'halo', 'halo'],
+    ['layers', 'needle', 'scroll needle'],
+    ['layers', 'rail', 'waveform rail'],
+    ['layers', 'smoke', 'footer smoke'],
+    ['layers', 'bleed', 'light bleed'],
+    ['layers', 'daguerre', 'daguerreotype warp'],
+
+    ['hero', 'parallax', 'pointer / gyro parallax'],
+    ['hero', 'sigil', 'sigil halo'],
+    ['hero', 'constellation', 'void constellation'],
+    ['hero', 'embers', 'floating embers'],
+    ['hero', 'eclipse', 'solar eclipse'],
+    ['hero', 'recede', 'scroll recede'],
+
+    ['motion', 'cards', '3d date cards'],
+    ['motion', 'scrollvel', 'scroll velocity'],
+    ['motion', 'shake', 'camera shake'],
+    ['motion', 'shockwave', 'kick shockwave'],
+    ['motion', 'sparks', 'sulfur sparks'],
+    ['motion', 'flash', 'match flash'],
+
+    ['audio', 'strike', 'match strike'],
+    ['audio', 'drone', 'sub-bass drone'],
+    ['audio', 'hiss', 'tape hiss'],
+    ['audio', 'bandoneon', 'bandoneón texture'],
+    ['audio', 'chime', 'tarot chime'],
+    ['audio', 'radio', '404 radio'],
+
+    ['ritual', 'gate', 'match-strike gate'],
+    ['ritual', 'cipher', 'cipher decryption'],
+    ['ritual', 'tarot', 'tarot oracle'],
+    ['ritual', 'soul', 'split soul'],
+    ['ritual', 'keystroke', 'keystroke ritual'],
+    ['ritual', 'whispers', 'whisper anchors'],
+    ['ritual', 'altar', 'ritual altar'],
+    ['ritual', 'bellows', 'bellows folds'],
+    ['ritual', 'badges', 'alchemical badges'],
+
+    ['platform', 'clock', 'buenos aires clock'],
+    ['platform', 'blackout', 'deep-night blackout'],
+    ['platform', 'countdown', 'countdown'],
+    ['platform', 'booking', 'booking bar'],
+    ['platform', 'progress', 'visited ceremonies'],
+    ['platform', 'share', 'web share'],
+    ['platform', 'haptic', 'haptics'],
+    ['platform', 'wakelock', 'wake lock'],
+    ['platform', 'battery', 'battery saver'],
+    ['platform', 'sw', 'offline service worker'],
+  ];
+
+  // Sliders scale globally. motion at 0 is a hard reduced-motion switch.
+  const FX_SLIDERS = [
+    ['motion', 'motion', 'drives parallax, tilt and scroll velocity; 0 = reduced motion'],
+    ['audio', 'audio', 'master output gain for every synth voice'],
+    ['grain', 'grain', 'opacity of the fixed noise / fog / grid layers'],
+  ];
+
+  const FX_KEY = 'marcaos:fx';
+  const fxState = { off: [], motion: 1, audio: 1, grain: 1, open: false };
+
+  try {
+    Object.assign(fxState, JSON.parse(localStorage.getItem(FX_KEY) || '{}'));
+  } catch (_) { /* private mode / quota — defaults stand */ }
+  if (!Array.isArray(fxState.off)) fxState.off = [];
+
+  function fxOn(id) {
+    return fxState.off.indexOf(id) === -1;
+  }
+
+  function fxNum(id) {
+    const n = Number(fxState[id]);
+    return Number.isFinite(n) ? n : 1;
+  }
+
+  // Single source of truth for "should this move?" — the OS preference
+  // OR the motion slider bottoming out.
+  function reduced() {
+    return fxNum('motion') === 0 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // Master output bus. Every voice connects here instead of ctx.destination
+  // so one slider controls the whole mix.
+  let masterOut = null;
+
+  function out(ctx) {
+    if (!masterOut || masterOut.context !== ctx) {
+      masterOut = ctx.createGain();
+      masterOut.gain.value = fxNum('audio');
+      masterOut.connect(ctx.destination);
+    }
+    return masterOut;
+  }
+
+  let updateBuenosAiresClock = null;
+
+  function applyFx() {
+    const root = document.documentElement;
+    FX.forEach((row) => root.classList.toggle('off-' + row[1], !fxOn(row[1])));
+    root.style.setProperty('--fx-grain', fxNum('grain'));
+    root.classList.toggle('fx-still', reduced());
+    if (masterOut && audioCtx) {
+      masterOut.gain.setTargetAtTime(fxNum('audio'), audioCtx.currentTime, 0.05);
+    }
+    if (updateBuenosAiresClock) updateBuenosAiresClock();
+    try {
+      localStorage.setItem(FX_KEY, JSON.stringify(fxState));
+    } catch (_) { /* non-fatal */ }
+  }
+
+  // One bad effect must not take the rest of the page down with it,
+  // and a disabled one must not run at all.
+  function run(id, fn) {
+    if (id && !fxOn(id)) return;
+    try {
+      fn();
+    } catch (e) {
+      console.warn('[fx] ' + (id || 'init') + ' failed:', e);
+    }
+  }
+
+  let fxPanel = null;
+  let fxBtn = null;
+
+  function buildFxPanel() {
+    if (fxPanel) return fxPanel;
+
+    const panel = document.createElement('aside');
+    panel.className = 'fx-panel';
+    panel.id = 'fx-panel';
+    panel.setAttribute('aria-label', 'effects');
+
+    const head = document.createElement('header');
+    const title = document.createElement('span');
+    title.textContent = '🜍 fx';
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'fx-close';
+    close.setAttribute('aria-label', 'close effects panel');
+    close.textContent = '×';
+    close.addEventListener('click', () => toggleFxPanel(false));
+    head.append(title, close);
+    panel.appendChild(head);
+
+    FX_SLIDERS.forEach((row) => {
+      const id = row[0];
+      const wrap = document.createElement('label');
+      wrap.className = 'fx-slider';
+      wrap.title = row[2];
+
+      const name = document.createElement('span');
+      name.textContent = row[1];
+      const input = document.createElement('input');
+      input.type = 'range';
+      input.min = '0';
+      input.max = '2';
+      input.step = '0.05';
+      input.value = String(fxNum(id));
+      const readout = document.createElement('b');
+      readout.textContent = fxNum(id).toFixed(2);
+
+      input.addEventListener('input', () => {
+        fxState[id] = Number(input.value);
+        readout.textContent = fxNum(id).toFixed(2);
+        applyFx();
+      });
+
+      wrap.append(name, input, readout);
+      panel.appendChild(wrap);
+    });
+
+    const groups = {};
+    const boxes = {};
+
+    FX.forEach((row) => {
+      const group = row[0];
+      const id = row[1];
+      if (!groups[group]) {
+        const fs = document.createElement('fieldset');
+        const legend = document.createElement('legend');
+        legend.textContent = group;
+        fs.appendChild(legend);
+        panel.appendChild(fs);
+        groups[group] = fs;
+      }
+
+      const label = document.createElement('label');
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = fxOn(id);
+      box.addEventListener('change', () => {
+        const at = fxState.off.indexOf(id);
+        if (box.checked && at > -1) fxState.off.splice(at, 1);
+        else if (!box.checked && at === -1) fxState.off.push(id);
+        applyFx();
+      });
+      label.append(box, document.createTextNode(' ' + row[2]));
+      groups[group].appendChild(label);
+      boxes[id] = box;
+    });
+
+    const foot = document.createElement('footer');
+    [['all on', () => []], ['all off', () => FX.map((r) => r[1])]].forEach((preset) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = preset[0];
+      btn.addEventListener('click', () => {
+        fxState.off = preset[1]();
+        applyFx();
+        Object.keys(boxes).forEach((id) => { boxes[id].checked = fxOn(id); });
+      });
+      foot.appendChild(btn);
+    });
+    panel.appendChild(foot);
+
+    const note = document.createElement('p');
+    note.className = 'fx-note';
+    note.textContent = 'most toggles apply live; share, visited, battery and the service worker settle on reload.';
+    panel.appendChild(note);
+
+    document.body.appendChild(panel);
+    fxPanel = panel;
+    return panel;
+  }
+
+  function toggleFxPanel(show) {
+    const panel = buildFxPanel();
+    const open = show === undefined ? !panel.classList.contains('open') : show;
+    panel.classList.toggle('open', open);
+    fxState.open = open;
+    if (fxBtn) fxBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open && fxBtn) fxBtn.focus();
+    applyFx();
+  }
+
+  function bindFxPanel() {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'fx-open';
+    btn.setAttribute('aria-label', 'effects panel');
+    btn.setAttribute('aria-controls', 'fx-panel');
+    btn.setAttribute('aria-expanded', fxState.open ? 'true' : 'false');
+    btn.textContent = '🜍 fx';
+    btn.addEventListener('click', () => toggleFxPanel());
+    (document.querySelector('.top-bar') || document.body).appendChild(btn);
+    fxBtn = btn;
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && fxPanel && fxPanel.classList.contains('open')) {
+        toggleFxPanel(false);
+      }
+    });
+
+    if (fxState.open || /(^|[?&])fx\b/.test(location.search)) toggleFxPanel(true);
+  }
+
+  applyFx();
+
   let audioCtx = null;
 
   function getAudioContext() {
@@ -22,7 +294,7 @@
   // Synthesizes signature sonic motif: match strike friction + sulfur pop + sub kick
   function playMatchStrike() {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    if (!ctx || !fxOn('strike')) return;
 
     const now = ctx.currentTime;
 
@@ -49,7 +321,7 @@
 
     whiteNoise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
+    noiseGain.connect(out(ctx));
 
     whiteNoise.start(now);
     whiteNoise.stop(now + 0.12);
@@ -76,7 +348,7 @@
 
     flareNoise.connect(flareFilter);
     flareFilter.connect(flareGain);
-    flareGain.connect(ctx.destination);
+    flareGain.connect(out(ctx));
 
     flareNoise.start(now + 0.08);
     flareNoise.stop(now + 0.45);
@@ -95,7 +367,7 @@
     kickGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
 
     kickOsc.connect(kickGain);
-    kickGain.connect(ctx.destination);
+    kickGain.connect(out(ctx));
 
     kickOsc.start(now + 0.18);
     kickOsc.stop(now + 1.25);
@@ -103,6 +375,7 @@
 
   // Visual flare / match flash effect
   function triggerVisualStrike() {
+    if (!fxOn('flash')) return;
     const flash = document.createElement('div');
     flash.className = 'match-flash';
     document.body.appendChild(flash);
@@ -120,8 +393,7 @@
 
   // ── Shockwave & Camera Shake Impulse (#43 & #7) ─────────────────
   function triggerShockwave() {
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (still) return;
+    if (reduced() || !fxOn('shockwave')) return;
 
     const wave = document.createElement('div');
     wave.className = 'kick-shockwave';
@@ -139,8 +411,7 @@
   }
 
   function triggerCameraShake() {
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (still) return;
+    if (reduced() || !fxOn('shake')) return;
 
     document.body.classList.add('camera-shake');
     setTimeout(() => {
@@ -153,7 +424,7 @@
   let droneNodes = null;
 
   function startSubBassDrone(ctx) {
-    if (droneNodes || !ctx) return;
+    if (droneNodes || !ctx || !fxOn('drone')) return;
 
     const now = ctx.currentTime;
 
@@ -193,14 +464,11 @@
       oscR.connect(masterGain);
     }
 
-    masterGain.connect(ctx.destination);
+    masterGain.connect(out(ctx));
 
     oscL.start(now);
     oscR.start(now);
     lfo.start(now);
-
-    // #1 — Procedural Tape Hiss & Wow/Flutter (Parque Centenario cassette emulation)
-    startProceduralTapeHiss(ctx, masterGain);
 
     droneNodes = { oscL, oscR, lfo, masterGain };
 
@@ -250,7 +518,7 @@
   }
 
   function startProceduralTapeHiss(ctx, targetNode) {
-    if (tapeHissNodes || !ctx) return;
+    if (tapeHissNodes || !ctx || !fxOn('hiss')) return;
     const now = ctx.currentTime;
     const buffer = createPinkNoiseBuffer(ctx, 3.5);
 
@@ -289,7 +557,7 @@
 
     source.connect(filter);
     filter.connect(hissGain);
-    hissGain.connect(targetNode || ctx.destination);
+    hissGain.connect(targetNode || out(ctx));
 
     source.start(now);
     wowLFO.start(now);
@@ -301,6 +569,7 @@
   // Haptic feedback during match strike sequence
   // Synchronized with friction noise (t=0), sulfur flare (t=0.08s), and 126 BPM sub-kick (t=0.18s)
   function triggerHapticStrike() {
+    if (!fxOn('haptic')) return;
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
         // 25ms friction scrape, 140ms flare buildup, 90ms ancestral sub-drop thump
@@ -315,7 +584,7 @@
   let wakeLock = null;
 
   async function requestWakeLock() {
-    if (!('wakeLock' in navigator)) return;
+    if (!fxOn('wakelock') || !('wakeLock' in navigator)) return;
     try {
       wakeLock = await navigator.wakeLock.request('screen');
     } catch (_) {
@@ -331,7 +600,7 @@
 
   // ── Sulfur Spark Physics (#21) — 12 golden-red sparks, gravity + drag ──
   function spawnSparks() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (reduced() || !fxOn('sparks')) return;
 
     const cv = document.createElement('canvas');
     Object.assign(cv.style, {
@@ -383,7 +652,7 @@
   // Periodic harmonic notch/comb filter shaping noise bursts to emulate
   // the breathing bellows of a distant tango accordion across San Telmo.
   function playBandoneonTexture(ctx) {
-    if (!ctx) return;
+    if (!ctx || !fxOn('bandoneon')) return;
     const now = ctx.currentTime;
     const duration = 2.4;
 
@@ -445,7 +714,7 @@
     f3.connect(delay);
     f3.connect(masterGain);
     delay.connect(masterGain);
-    masterGain.connect(ctx.destination);
+    masterGain.connect(out(ctx));
 
     bellowsLfo.start(now);
     noiseSource.start(now);
@@ -469,6 +738,7 @@
       spawnSparks();
       if (ctx) {
         startSubBassDrone(ctx);
+        startProceduralTapeHiss(ctx, droneNodes ? droneNodes.masterGain : null);
         playBandoneonTexture(ctx);
       }
     }, 180);
@@ -476,9 +746,6 @@
 
   // ── Alchemical / Cipher Coordinate Decryption on Hover (#48) ────
   function bindCipherDecryption() {
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (still) return;
-
     const glyphs = '🜂🜏☿🜃🜄☉☽12608';
     const targets = document.querySelectorAll('.dates .v, [data-cipher]');
 
@@ -490,6 +757,7 @@
       const parentRow = el.closest('li') || el;
 
       parentRow.addEventListener('pointerenter', () => {
+        if (reduced() || !fxOn('cipher')) return;
         let iteration = 0;
         clearInterval(timer);
 
@@ -526,6 +794,7 @@
     let buffer = '';
 
     window.addEventListener('keydown', (e) => {
+      if (!fxOn('keystroke')) return;
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       if (e.key.length !== 1) return;
 
@@ -547,20 +816,18 @@
     if (!hero) return;
 
     const fine = window.matchMedia('(pointer: fine)').matches;
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (still) return;
-
     let raf = 0;
 
     if (fine) {
       // Desktop fine cursor parallax
       hero.addEventListener('pointermove', (e) => {
-        if (raf) return;
+        if (raf || reduced() || !fxOn('parallax')) return;
         raf = requestAnimationFrame(() => {
           raf = 0;
           const r = hero.getBoundingClientRect();
-          hero.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
-          hero.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+          const m = fxNum('motion');
+          hero.style.setProperty('--px', (((e.clientX - r.left) / r.width - 0.5) * m).toFixed(3));
+          hero.style.setProperty('--py', (((e.clientY - r.top) / r.height - 0.5) * m).toFixed(3));
         });
       });
       hero.addEventListener('pointerleave', () => {
@@ -570,11 +837,12 @@
     } else if (typeof window.DeviceOrientationEvent !== 'undefined') {
       // Mobile DeviceOrientation / Gyroscope Parallax (#73)
       window.addEventListener('deviceorientation', (e) => {
-        if (raf || e.gamma === null || e.beta === null) return;
+        if (raf || reduced() || !fxOn('parallax') || e.gamma === null || e.beta === null) return;
         raf = requestAnimationFrame(() => {
           raf = 0;
-          const px = Math.min(0.5, Math.max(-0.5, e.gamma / 90));
-          const py = Math.min(0.5, Math.max(-0.5, (e.beta - 45) / 50));
+          const m = fxNum('motion');
+          const px = Math.min(0.5, Math.max(-0.5, e.gamma / 90)) * m;
+          const py = Math.min(0.5, Math.max(-0.5, (e.beta - 45) / 50)) * m;
           hero.style.setProperty('--px', px.toFixed(3));
           hero.style.setProperty('--py', py.toFixed(3));
         });
@@ -597,12 +865,13 @@
       const night = hour >= 20 || hour < 7;
       document.body.classList.toggle('ba-night', night);
       // #16 — deep-night crushes the whole palette to pure black
-      document.body.classList.toggle('blackout', hour >= 1 && hour < 5);
+      document.body.classList.toggle('blackout', fxOn('blackout') && hour >= 1 && hour < 5);
       el.textContent = (night ? '● ' : '○ ') + 'buenos aires · ' +
         (night ? el.dataset.night : el.dataset.day);
       el.hidden = false;
     };
 
+    updateBuenosAiresClock = update;
     update();
     setInterval(update, 60000);
   }
@@ -683,7 +952,7 @@
   // ── Procedural Smoke Canvas (#17) — smoky brown wisps across the footer ──
   function bindSmoke() {
     const cv = document.querySelector('canvas.smoke');
-    if (!cv || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!cv) return;
 
     const g = cv.getContext('2d');
     let w;
@@ -706,6 +975,7 @@
     let raf = 0;
     const frame = () => {
       g.clearRect(0, 0, w, h);
+      if (reduced() || !fxOn('smoke')) { raf = requestAnimationFrame(frame); return; }
       for (const p of puffs) {
         p.x += p.vx;
         if (p.x - p.r > w) { p.x = -p.r; p.y = Math.random() * h; }
@@ -729,7 +999,6 @@
 
   // ── Scroll velocity → --scroll-vel (#22 phosphor ghost, #27 aberration) & --scroll-dir-vel (#32 skew) ──
   function bindScrollVelocity() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const root = document.documentElement;
     let last = window.scrollY;
     let vel = 0;
@@ -746,7 +1015,7 @@
 
     window.addEventListener('scroll', () => {
       const current = window.scrollY;
-      const delta = current - last;
+      const delta = (current - last) * (fxOn('scrollvel') ? fxNum('motion') : 0);
       vel = Math.min(1, vel + Math.abs(delta) / 120);
       dirVel = Math.max(-1, Math.min(1, dirVel + delta / 80));
       last = current;
@@ -760,7 +1029,7 @@
     const root = document.documentElement;
     let raf = 0;
     window.addEventListener('pointermove', (e) => {
-      if (raf) return;
+      if (raf || !fxOn('bleed')) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
         root.style.setProperty('--mx', e.clientX + 'px');
@@ -775,12 +1044,20 @@
     if (!window.matchMedia('(pointer: fine)').matches) return;
     const cards = document.querySelectorAll('.dates li, .timeline li');
     cards.forEach((card) => {
+      let raf = 0;
       card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-        card.style.setProperty('--card-rx', (-y * 12).toFixed(2));
-        card.style.setProperty('--card-ry', (x * 12).toFixed(2));
+        if (raf || !fxOn('cards')) return;
+        const cx = e.clientX;
+        const cy = e.clientY;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          const rect = card.getBoundingClientRect();
+          const x = (cx - rect.left) / rect.width - 0.5;
+          const y = (cy - rect.top) / rect.height - 0.5;
+          const m = fxNum('motion');
+          card.style.setProperty('--card-rx', (-y * 12 * m).toFixed(2));
+          card.style.setProperty('--card-ry', (x * 12 * m).toFixed(2));
+        });
       });
       card.addEventListener('mouseleave', () => {
         card.style.setProperty('--card-rx', '0');
@@ -794,7 +1071,10 @@
     const toggle = document.getElementById('soul-toggle');
     if (!toggle) return;
     const label = toggle.querySelector('.soul-label');
-    const isMarcosSaved = localStorage.getItem('marchaos_soul') === 'marcos';
+    let isMarcosSaved = false;
+    try {
+      isMarcosSaved = localStorage.getItem('marchaos_soul') === 'marcos';
+    } catch (_) { /* private mode — default soul stands */ }
 
     function setSoul(isMarcos) {
       if (isMarcos) {
@@ -813,7 +1093,9 @@
     toggle.addEventListener('click', () => {
       const isMarcos = !document.body.classList.contains('marcos-soul');
       setSoul(isMarcos);
-      localStorage.setItem('marchaos_soul', isMarcos ? 'marcos' : 'marchaos');
+      try {
+        localStorage.setItem('marchaos_soul', isMarcos ? 'marcos' : 'marchaos');
+      } catch (_) { /* non-fatal */ }
     });
   }
 
@@ -858,7 +1140,7 @@
 
     function initRadioAudio() {
       const ctx = getAudioContext();
-      if (!ctx || radioNoiseSource) return;
+      if (!ctx || radioNoiseSource || !fxOn('radio')) return;
 
       const buffer = createPinkNoiseBuffer(ctx, 2.0);
       radioNoiseSource = ctx.createBufferSource();
@@ -874,7 +1156,7 @@
 
       radioNoiseSource.connect(filter);
       filter.connect(radioNoiseGain);
-      radioNoiseGain.connect(ctx.destination);
+      radioNoiseGain.connect(out(ctx));
       radioNoiseSource.start();
 
       // Demo synth for 126.0 ritual band
@@ -884,7 +1166,7 @@
       demoOsc.frequency.setValueAtTime(63.0, ctx.currentTime);
       demoGain.gain.setValueAtTime(0.0001, ctx.currentTime);
       demoOsc.connect(demoGain);
-      demoGain.connect(ctx.destination);
+      demoGain.connect(out(ctx));
       demoOsc.start();
     }
 
@@ -1026,7 +1308,7 @@
   ];
 
   function playTarotChime(ctx) {
-    if (!ctx) return;
+    if (!ctx || !fxOn('chime')) return;
     const now = ctx.currentTime;
     const freqs = [528, 792, 1056];
     freqs.forEach((freq, idx) => {
@@ -1038,7 +1320,7 @@
       gain.gain.exponentialRampToValueAtTime(0.07 / (idx + 1), now + idx * 0.04 + 0.01);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.04 + 1.8);
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(out(ctx));
       osc.start(now + idx * 0.04);
       osc.stop(now + idx * 0.04 + 1.85);
     });
@@ -1052,7 +1334,7 @@
     subGain.gain.exponentialRampToValueAtTime(0.12, now + 0.08);
     subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
     subOsc.connect(subGain);
-    subGain.connect(ctx.destination);
+    subGain.connect(out(ctx));
     subOsc.start(now);
     subOsc.stop(now + 2.05);
   }
@@ -1111,7 +1393,6 @@
   // Vertical waveform path on the left margin that deforms and spikes
   // as the user scrolls past sound quotes and listen sections.
   function bindWaveformRail() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const rail = document.querySelector('.waveform-rail');
     if (!rail) return;
     const path = rail.querySelector('.waveform-path');
@@ -1153,6 +1434,11 @@
     };
 
     const render = () => {
+      if (reduced() || !fxOn('rail')) {
+        if (isNearQuotes) raf = requestAnimationFrame(render);
+        else raf = 0;
+        return;
+      }
       t += 0.08;
       rail.classList.toggle('spiking', quoteProximity > 0.2);
 
@@ -1209,7 +1495,7 @@
   // ── Fallbacks for browsers without CSS Scroll-Driven / Scroll-State APIs ──
   function bindSpatialFallbacks() {
     // Fallback for ViewTimeline Quote Reveals (#36)
-    if (!CSS.supports('animation-timeline: view()') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!CSS.supports('animation-timeline: view()')) {
       const quoteLines = document.querySelectorAll('.quote-line');
       if (quoteLines.length && 'IntersectionObserver' in window) {
         const quoteObserver = new IntersectionObserver((entries) => {
@@ -1259,25 +1545,28 @@
         igniteCeremony();
       });
     });
-    bindHeroParallax();
-    bindCipherDecryption();
-    bindKeystrokeRitual();
-    bindBuenosAiresClock();
-    bindCountdown();
-    bindCeremonyProgress();
-    bindShare();
-    bindSmoke();
-    bindScrollVelocity();
-    bindLightBleed();
-    bindFloatingCards();
-    bindSplitSoul();
-    bindBatteryConservation();
-    bindRadioTuner();
-    bindMatchGate();
-    bindTarotOracle();
-    bindWaveformRail();
-    bindSpatialFallbacks();
-    registerServiceWorker();
+    // Second argument is the fx id when the effect can only be decided at
+    // bind time; null means the effect guards itself and toggles live.
+    run(null, bindFxPanel);
+    run(null, bindHeroParallax);
+    run(null, bindCipherDecryption);
+    run(null, bindKeystrokeRitual);
+    run(null, bindBuenosAiresClock);
+    run(null, bindCountdown);
+    run('progress', bindCeremonyProgress);
+    run('share', bindShare);
+    run(null, bindSmoke);
+    run(null, bindScrollVelocity);
+    run(null, bindLightBleed);
+    run(null, bindFloatingCards);
+    run(null, bindSplitSoul);
+    run('battery', bindBatteryConservation);
+    run(null, bindRadioTuner);
+    run(null, bindMatchGate);
+    run(null, bindTarotOracle);
+    run(null, bindWaveformRail);
+    run(null, bindSpatialFallbacks);
+    run('sw', registerServiceWorker);
   });
 })();
 
